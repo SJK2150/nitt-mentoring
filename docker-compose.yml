@@ -1,6 +1,18 @@
 version: "3"
 
 services:
+  postgres:
+    image: postgres:16
+    container_name: nitt-mentoring-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: mentoring
+      POSTGRES_PASSWORD: secret123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   nitt-mentoring:
     container_name: nitt-mentoring
     build:
@@ -8,3 +20,10 @@ services:
       dockerfile: DockerFile
     ports:
       - "1920:1920"
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/mentoring?schema=public
+
+volumes:
+  postgres_data:

@@ -4,11 +4,14 @@ import config from "~/config";
 const transporter = nodemailer.createTransport({
   host: config.SMTP_HOST,
   port: parseInt(config.SMTP_PORT),
-  secure: true,
+  secure: parseInt(config.SMTP_PORT) === 465, // true for 465, false for other ports like 587
   auth: {
     user: config.SMTP_USER,
     pass: config.SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // Allow self-signed certificates in development
+  }
 });
 const subject = "Reset Your Password on NITT Mentoring Portal";
 const createHtmlContent = (resetLink: string): string => `

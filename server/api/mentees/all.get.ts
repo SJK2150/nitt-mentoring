@@ -24,9 +24,18 @@ export default defineEventHandler(async (e) => {
         statusText: "You do not have permission.",
       });
     }
-    const users = await client.prisma.students.findMany();
+    const users = await client.prisma.students.findMany({
+      include: {
+        user: true,
+        department: true,
+        mentor: true
+      }
+    });
     if (users) {
-      return users.map((user) => client.manager.createPartialStudent(user));
+      return users.map((user) => ({
+        ...client.manager.createPartialStudent(user),
+        username: user.user.username
+      }));
     } else {
       // This def won't happen
       throw createError({

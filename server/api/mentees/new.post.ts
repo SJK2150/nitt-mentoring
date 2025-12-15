@@ -71,18 +71,7 @@ export default defineEventHandler(async (e) => {
     }
   }
 
-  if (body.year === 'PG') {
-    const pgRequiredFields = ['ugCGPA', 'gateScore'];
-    const missingPgFields = pgRequiredFields.filter(field => body[field as keyof typeof body] === undefined);
-    
-    if (missingPgFields.length > 0) {
-      console.log(`Missing PG student fields: ${missingPgFields.join(', ')}`);
-      throw createError({
-        statusCode: 400,
-        statusText: `PG students must provide: ${missingPgFields.join(', ')}`
-      });
-    }
-  }
+  // PG students don't need section, batch, ugCGPA, or gateScore - they're all optional
 
   const encryptedPass = await hash(body.password, 10);
 
@@ -105,12 +94,12 @@ export default defineEventHandler(async (e) => {
           user_id: userCreated.id,
           name: body.name,
           year: body.year,
-          section: body.section,
-          batch:body.batch,
+          section: body.year === 'UG' ? body.section : null,
+          batch: body.year === 'UG' ? body.batch : null,
           department_id: body.department,
-          ug_cgpa: body.year === 'PG' ? body.ugCGPA || 0 : 0,
-          gate_score: body.year === 'PG' ? body.gateScore || 0 : 0,
-          work_experience: body.year === 'PG' ? body.workExperience || '' : ''
+          ug_cgpa: body.year === 'PG' ? (body.ugCGPA || 0) : 0,
+          gate_score: body.year === 'PG' ? (body.gateScore || 0) : 0,
+          work_experience: body.year === 'PG' ? (body.workExperience || '') : ''
         },
       });
     });

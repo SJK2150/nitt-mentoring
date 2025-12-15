@@ -25,12 +25,13 @@ export default defineEventHandler(async (e) => {
       });
     }
     const users = await client.prisma.faculty.findMany({
-      include: { user: true, mentees: true },
+      include: { user: true, mentees: true, department: true },
     });
     if (users) {
       return users.map((user) => ({
         ...client.manager.createPartialFaculty(user),
         menteeCount: user.mentees.length,
+        username: user.user.username
       }));
     } else {
       // This def won't happen

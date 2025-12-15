@@ -160,35 +160,31 @@
   
   async function deleteMentee(mentee: PartialStudent) {
     const auth = useCookie<string>("nitt_token")
-    console.log("lol")
     if (!auth.value) return
   
+    if (!confirm(`Are you sure you want to delete ${mentee.name} (${mentee.register_number})?`)) {
+      return
+    }
+  
     try {
-      const { error } = await useFetch(`/api/mentees/delete/${mentee.register_number}`, {
+      // Delete using the users delete endpoint which handles cascading deletions
+      const { error } = await useFetch(`/api/users/delete/${mentee.register_number}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${auth.value}`,
         }
       })
-      console.log(mentee);
-      await useFetch(`/api/users/delete/${mentee.register_number}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${auth.value}`,
-        }
-      });
 
       if (error.value) {
         console.error("Delete failed", error.value)
-        alert("Failed to delete mentee. Please try again.")
-      }
-       else {
+        alert("Failed to delete student. Please try again.")
+      } else {
         emit('deleted', mentee.register_number)
-        console.log("here")
+        alert("Student deleted successfully!")
       }
     } catch (err) {
       console.error(err)
-      alert("An error occurred while deleting the mentee.")
+      alert("An error occurred while deleting the student.")
     }
   }
   </script>

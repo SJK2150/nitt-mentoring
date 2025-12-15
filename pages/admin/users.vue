@@ -1,6 +1,24 @@
 <template>
     <div class="p-2 flex flex-col items-center w-full mt-12">
         <h1 class="text-2xl uppercase font-bold w-full text-left">All Users</h1>
+        
+        <!-- Tab Navigation -->
+        <div class="flex gap-2 border-b border-gray-300 w-full mt-4">
+            <button 
+                v-for="tab in tabs" 
+                :key="tab"
+                @click="activeTab = tab"
+                :class="[
+                    'px-4 py-2 font-semibold transition-colors',
+                    activeTab === tab 
+                        ? 'border-b-2 border-nitMaroon-600 text-nitMaroon-600' 
+                        : 'text-gray-600 hover:text-nitMaroon-600'
+                ]"
+            >
+                {{ tab }}
+            </button>
+        </div>
+
         <div class="p-4 flex flex-col items-center gap-4 w-full">
             <div class="flex flex-col items-center gap-2 w-full">
                 <div class="flex flex-row items-center justify-start lg:justify-end w-full gap-4">
@@ -12,17 +30,44 @@
                             :class="`${expandFilter ? `max-h-[90rem]` : `max-h-0`} flex flex-col lg:flex-row gap-2 overflow-y-hidden transition-all duration-500 ease-in-out`">
                             <input type="text" id="search_field" v-model="search"
                                 class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                                placeholder="Name" />
+                                placeholder="Search by name or ID" />
                         </div>
                     </div>
                 </div>
-                <div v-if="users"
+                
+                <!-- Loading State -->
+                <div v-if="loading" class="text-center py-8">Loading...</div>
+                
+                <!-- Faculty Tab -->
+                <div v-else-if="activeTab === 'Faculty' && displayedUsers"
                     class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-stretch w-full gap-4 mt-5 pr-4 max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-6xl">
-                    <ul v-for="user in computedusers" :key="user.id"
+                    <ul v-for="user in displayedUsers" :key="user.id"
                         class="text-start bg-zinc-100 rounded-md p-2 block w-full">
-                        <li class="font-bold text-center">{{ user.username }}</li>
-                        <li class="font-semibold text-xs text-center">#{{ user.id }}</li>
-                        <li class="font-semibold text-xs text-center">{{ user.level }}</li>
+                        <li class="font-bold text-center">{{ user.name }}</li>
+                        <li class="font-semibold text-xs text-center">Staff ID: {{ user.id }}</li>
+                        <li class="font-semibold text-xs text-center">{{ user.department }}</li>
+                        <li>
+                            <button @click="_ => setUser(user.username)" class="mx-auto flex items-center justify-center">
+                                <span class="sr-only">Edit Password</span>
+                                <svg class="block w-5 h-5 stroke-2 stroke-rose-700 mx-auto"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path class="transition-all duration-500 transform ease-in-out" stroke-linecap="round"
+                                        stroke-linejoin="round" :d="`${AllIcons.services}`" />
+                                </svg>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- UG/PG Students Tab -->
+                <div v-else-if="(activeTab === 'UG Students' || activeTab === 'PG Students') && displayedUsers"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-stretch w-full gap-4 mt-5 pr-4 max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-6xl">
+                    <ul v-for="user in displayedUsers" :key="user.id"
+                        class="text-start bg-zinc-100 rounded-md p-2 block w-full">
+                        <li class="font-bold text-center">{{ user.name }}</li>
+                        <li class="font-semibold text-xs text-center">{{ user.register_no }}</li>
+                        <li class="font-semibold text-xs text-center">{{ user.year }} - {{ user.section || 'N/A' }}</li>
+                        <li class="font-semibold text-xs text-center">Batch: {{ user.batch || 'N/A' }}</li>
                         <li>
                             <button @click="_ => setUser(user.username)" class="mx-auto flex items-center justify-center">
                                 <span class="sr-only">Edit Password</span>
@@ -81,30 +126,66 @@ definePageMeta({
         "level3"
     ]
 })
+
+const tabs = ['Faculty', 'UG Students', 'PG Students']
+const activeTab = ref('Faculty')
+
 const modelOpen = ref(false);
 const currentUser = ref("")
 const userStore = useUserStore()
-const users = await useAllUsers();
 
 const newPass = ref("")
 const confirmPass = ref("")
 
-const setUser = (user: string) => {
-    currentUser.value = user;
-    modelOpen.value = true;
-}
+// Server-side data fetching - more reliable
+const auth = useCookie<string>("nitt_token")
 
-const computedusers = computed(() => {
-    return !expandFilter.value ? users :
-        users.filter(x => {
-            return (
-                (search.value.startsWith("#") ? String(x.id).startsWith(search.value.slice(1)) : x.username.toLowerCase().includes(search.value.toLowerCase()))
-            )
-        })
+const { data: facultyData, refresh: refreshFaculty } = await useFetch('/api/faculty/all', {
+    headers: { "Authorization": `Bearer ${auth.value}` },
+    key: 'faculty-list'
 })
+
+const { data: studentsData, refresh: refreshStudents } = await useFetch('/api/mentees/all', {
+    headers: { "Authorization": `Bearer ${auth.value}` },
+    key: 'students-list'
+})
+
+const facultyUsers = computed(() => facultyData.value || [])
+const ugStudents = computed(() => (studentsData.value || []).filter((s: any) => s.year === 'UG'))
+const pgStudents = computed(() => (studentsData.value || []).filter((s: any) => s.year === 'PG'))
 
 const search = ref("")
 const expandFilter = ref(false)
+
+const displayedUsers = computed(() => {
+    let users: any[] = []
+    
+    if (activeTab.value === 'Faculty') {
+        users = facultyUsers.value
+    } else if (activeTab.value === 'UG Students') {
+        users = ugStudents.value
+    } else if (activeTab.value === 'PG Students') {
+        users = pgStudents.value
+    }
+    
+    if (!expandFilter.value || !search.value) return users
+    
+    return users.filter(user => {
+        const searchLower = search.value.toLowerCase()
+        if (activeTab.value === 'Faculty') {
+            return user.name?.toLowerCase().includes(searchLower) ||
+                   String(user.id).includes(search.value)
+        } else {
+            return user.name?.toLowerCase().includes(searchLower) ||
+                   user.register_no?.toLowerCase().includes(searchLower)
+        }
+    })
+})
+
+const setUser = (username: string) => {
+    currentUser.value = username;
+    modelOpen.value = true;
+}
 
 const message = ref({ type: "error", text: "" })
 const handleSubmit = async (e: Event) => {
@@ -130,7 +211,6 @@ const handleSubmit = async (e: Event) => {
             message.value.type = "error"
             switch (response.status) {
                 case 400:
-                    // this won't happen
                     message.value.text = "Missing Fields."
                 case 401:
                     message.value.text = "You are not supposed to be here."
@@ -143,7 +223,6 @@ const handleSubmit = async (e: Event) => {
                     break;
             }
             abortNavigation()
-
         }
     })
 };

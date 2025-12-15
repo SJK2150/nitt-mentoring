@@ -14,12 +14,17 @@ definePageMeta({
     middleware: ["level1"]
 })
 
-const mentees = ref<PartialStudent[]>([])
+const auth = useCookie<string>("nitt_token")
 
-// Fetch mentees with reactivity
-onMounted(async () => {
-    const data = await useSudoMentee()
-    mentees.value = (data || []).map(mentee => ({
+// Server-side data fetching - more reliable
+const { data: studentsData } = await useFetch('/api/mentees/all', {
+    headers: { "Authorization": `Bearer ${auth.value}` },
+    key: 'hod-students-list'
+})
+
+const mentees = computed(() => {
+    if (!studentsData.value) return []
+    return studentsData.value.map(mentee => ({
         register_number: mentee.register_number,
         name: mentee.name,
         year: mentee.year,
@@ -31,10 +36,14 @@ onMounted(async () => {
         is_pg: typeof mentee.is_pg === 'boolean' ? mentee.is_pg : false
     }))
 })
+
 // Handle deletion from child
 function handleDeleted(register_number: string) {
-    mentees.value = mentees.value.filter(
-        m => m.register_number !== register_number
-    )
+    // Remove from the data source
+    if (studentsData.value) {
+        studentsData.value = studentsData.value.filter(
+            m => m.register_number !== register_number
+        )
+    }
 }
 </script>
