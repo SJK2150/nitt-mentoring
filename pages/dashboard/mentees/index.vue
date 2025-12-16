@@ -1,37 +1,62 @@
 <template>
-    <div class="flex flex-col gap-4">
-        <h1 class="text-2xl uppercase font-bold">Your Mentees</h1>
-        <div class="flex flex-row items-center justify-start lg:justify-end w-full gap-4">
-            <div class="flex flex-col items-end gap-4">
-                <button class="bg-nitMaroon-600 text-white rounded-md p-2" @click="_ => expandFilter = !expandFilter">Filter
-                    {{ expandFilter ? `-` : `+` }}</button>
-                <div
-                    :class="`${expandFilter ? `max-h-[90rem]` : `max-h-0`} flex flex-col lg:flex-row gap-2 overflow-y-hidden transition-all duration-500 ease-in-out`">
-                    <input type="text" id="search_field" v-model="batch"
-                        class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                        placeholder="Batch" />
-                    <input type="text" id="search_field" v-model="classSection"
-                        class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                        placeholder="Section" />
-                    <input type="text" id="search_field" v-model="name"
-                        class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                        placeholder="Name" />
-                    <input type="text" id="search_field" v-model="regNo"
-                    class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                    placeholder="Reg No" />
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold text-gray-900">Your Mentees</h1>
+                <p class="text-gray-600 mt-1">Manage mentee meetings and records</p>
+            </div>
+
+            <!-- Filters and Export -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+                <div class="flex flex-col lg:flex-row gap-4 mb-4">
+                    <input 
+                        type="text" 
+                        v-model="batch"
+                        class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        placeholder="Filter by batch" 
+                    />
+                    <input 
+                        type="text" 
+                        v-model="classSection"
+                        class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        placeholder="Filter by section" 
+                    />
+                    <input 
+                        type="text" 
+                        v-model="name"
+                        class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        placeholder="Filter by name" 
+                    />
+                    <input 
+                        type="text" 
+                        v-model="regNo"
+                        class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        placeholder="Filter by reg no" 
+                    />
+                </div>
+                
+                <div class="flex flex-wrap gap-3 items-center">
+                    <select 
+                        v-model="selectedMeetingNumber" 
+                        class="flex-1 min-w-[200px] px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500">
+                        <option value="">Select Meeting Number</option>
+                        <option v-for="meeting in meetingNumbers" :value="meeting.meeting_number">{{ meeting?.meeting_number }}</option>
+                    </select>
+                    <button 
+                        :disabled="!selectedMeetingNumber"
+                        @click="exportToPDF"
+                        :class="['px-6 py-2.5 rounded-lg font-medium transition-colors', selectedMeetingNumber ? 'bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed']">
+                        Export to PDF
+                    </button>
                 </div>
             </div>
+
+            <!-- Mentees List -->
+            <div class="space-y-4">
+                <EditableMentee v-for="mentee in computedMentees" :mentee="mentee" :key="mentee?.meeting_number" />
+            </div>
         </div>
-        <div class="flex flex-wrap w-full justify-end items-center gap-5">
-            <select v-model="selectedMeetingNumber" class="border-2 border-nitMaroon-600 rounded-md outline-none md:min-w-[250px] py-1.5">
-                <option value="">Select Meeting Number</option>
-                <option v-for="(meeting, index) in meetingNumbers" :value="meeting.meeting_number">{{ meeting?.meeting_number }}</option>
-            </select>
-            <button :class="['text-white', 'rounded-md', 'p-2', !selectedMeetingNumber ?'bg-nitMaroon-300' : 'bg-nitMaroon-600']" :disabled="!selectedMeetingNumber" @click="exportToPDF">Export to PDF</button>
-        </div>
-        <div class="flex flex-col space-y-4">
-            <EditableMentee v-for="mentee in computedMentees" :mentee="mentee" :key="mentee?.meeting_number" />
-        </div>
+
         <!-- Start of PDF Template -->
         <div ref="pdfContainer" :style="{ visibility: exportToPdfMode ? 'visible' : 'hidden' }">
             <div class="flex items-center justify-center gap-4 mb-3">

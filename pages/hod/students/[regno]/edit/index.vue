@@ -1,30 +1,42 @@
 <template>
-  <div class="flex flex-col gap-4 p-2 mt-12">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl uppercase font-bold">Edit Student: {{ mentee?.name }}</h1>
-      <NuxtLink 
-        :to="`/hod/students`"
-        class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
-      >
-        Back to Students
-      </NuxtLink>
-    </div>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8 animate-fade-in">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Edit Student</h1>
+          <p class="text-gray-600 mt-2">{{ mentee?.name }}</p>
+        </div>
+        <NuxtLink 
+          :to="`/hod/students`"
+          class="px-6 py-3 bg-gray-500 text-white font-semibold rounded shadow-sm hover:shadow hover:bg-gray-600 transition-all duration-300">
+          <span class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+          </span>
+        </NuxtLink>
+      </div>
 
-    <div v-if="loading" class="text-lg text-gray-600">
-      Loading student information...
-    </div>
+      <div v-if="loading" class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200 text-center animate-slide-up">
+        <div class="flex items-center justify-center gap-3">
+          <div class="w-6 h-6 border-4 border-nitMaroon-600 border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-gray-600 font-medium">Loading student information...</p>
+        </div>
+      </div>
 
-    <div v-else-if="mentee" class="max-w-2xl mx-auto">
-      <!-- Basic Information -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-xl font-semibold mb-4 text-nitMaroon-600">Basic Information</h2>
-        <form @submit.prevent="updateBasicInfo" class="space-y-4">
+      <div v-else-if="mentee" class="animate-slide-up">
+        <!-- Basic Information Card -->
+        <div class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Basic Information</h2>
+          <form @submit.prevent="updateBasicInfo" class="flex flex-col gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Register Number</label>
             <input 
               v-model="basicForm.register_number" 
               type="text" 
-              class="w-full p-2 border border-gray-300 rounded-md"
+              class="w-full px-4 py-3 border border-gray-300 rounded bg-yellow-50"
               readonly
             />
           </div>
@@ -33,13 +45,13 @@
             <input 
               v-model="basicForm.name" 
               type="text" 
-              class="w-full p-2 border border-gray-300 rounded-md"
+              class="w-full px-4 py-3 border border-gray-300 rounded bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
               required
             />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
-            <select v-model="basicForm.year" class="w-full p-2 border border-gray-300 rounded-md" required>
+            <select v-model="basicForm.year" class="w-full px-4 py-3 border border-gray-300 rounded bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" required>
               <option value="UG">UG</option>
               <option value="PG">PG</option>
             </select>
@@ -49,7 +61,7 @@
             <input 
               v-model="basicForm.section" 
               type="text" 
-              class="w-full p-2 border border-gray-300 rounded-md"
+              class="w-full px-4 py-3 border border-gray-300 rounded bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
             />
           </div>
           <div>
@@ -57,12 +69,12 @@
             <input 
               v-model="basicForm.batch" 
               type="number" 
-              class="w-full p-2 border border-gray-300 rounded-md"
+              class="w-full px-4 py-3 border border-gray-300 rounded bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
             />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
-            <select v-model="basicForm.department_id" class="w-full p-2 border border-gray-300 rounded-md" required>
+            <select v-model="basicForm.department_id" class="w-full px-4 py-3 border border-gray-300 rounded bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" required>
               <option v-for="dept in departments" :key="dept.id" :value="dept.id">
                 {{ dept.name }}
               </option>
@@ -70,17 +82,18 @@
           </div>
           <button 
             type="submit" 
-            class="w-full bg-nitMaroon-600 text-white py-2 px-4 rounded-md hover:bg-nitMaroon-700 transition-colors"
+            class="w-full bg-nitMaroon-600 text-white py-3 px-4 rounded shadow-sm hover:shadow hover:bg-nitMaroon-700 transition-all font-semibold"
             :disabled="updating"
           >
             {{ updating ? 'Updating...' : 'Update Basic Info' }}
           </button>
         </form>
+        </div>
       </div>
-    </div>
 
-    <div v-else class="text-red-500 font-medium">
-      Student not found
+      <div v-else class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200 text-center animate-slide-up">
+        <p class="text-red-500 font-semibold text-lg">Student not found</p>
+      </div>
     </div>
   </div>
 </template>

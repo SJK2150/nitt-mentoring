@@ -1,17 +1,17 @@
 <template>
-  <div class="p-2 flex flex-col items-center w-full mt-12">
-    <div
-      class="p-4 flex flex-col items-center gap-4 bg-nitMaroon-100 border-stone-400 border-b border-r shadow-xl rounded-xl max-w-3xl w-full"
-    >
-      <h1 class="text-2xl font-bold">
-        NITT Mentoring Portal - Change Password
-      </h1>
-      <form
-        class="flex flex-col items-center gap-4 pt-8"
-        @submit="handleSubmit"
-      >
-        <div class="flex flex-col items-center gap-2">
-          <label htmlFor="username_field" class="w-full text-start">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div class="max-w-2xl mx-auto">
+      <!-- Header -->
+      <div class="mb-8 animate-fade-in">
+        <h1 class="text-3xl font-bold text-gray-900">Change Password</h1>
+        <p class="text-gray-600 mt-2">Update your account password using the reset link</p>
+      </div>
+      
+      <!-- Form Card -->
+      <div class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200 animate-slide-up">
+      <form class="flex flex-col gap-6" @submit="handleSubmit">
+        <div class="flex flex-col gap-2">
+          <label htmlFor="username_field" class="text-sm font-semibold text-gray-700">
             Username
           </label>
           <input
@@ -19,12 +19,14 @@
             name="username"
             id="username_field"
             type="text"
-            placeholder="106123082"
-            class="p-2 w-full lg:w-96 rounded-md shadow-md"
+            placeholder="Your username"
+            readonly
+            class="px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 cursor-not-allowed"
           />
         </div>
-        <div class="flex flex-col items-center gap-2">
-          <label htmlFor="password_field" class="w-full text-start">
+        
+        <div class="flex flex-col gap-2">
+          <label htmlFor="password_field" class="text-sm font-medium text-gray-700">
             New Password
           </label>
           <input
@@ -32,12 +34,14 @@
             name="password"
             id="password_field"
             type="password"
-            placeholder="New Password"
-            class="p-2 w-full lg:w-96 rounded-md shadow-md"
+            placeholder="Enter new password"
+            required
+            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
           />
         </div>
-        <div class="flex flex-col items-center gap-2">
-          <label htmlFor="confirm_password_field" class="w-full text-start">
+        
+        <div class="flex flex-col gap-2">
+          <label htmlFor="confirm_password_field" class="text-sm font-medium text-gray-700">
             Confirm New Password
           </label>
           <input
@@ -45,26 +49,26 @@
             name="confirm_password"
             id="confirm_password_field"
             type="password"
-            placeholder="Confirm New Password"
-            class="p-2 w-full lg:w-96 rounded-md shadow-md"
+            placeholder="Confirm new password"
+            required
+            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
           />
         </div>
         <MiscMessage
-          :class="`${
-            message.text ? `opacity-100` : `opacity-0`
-          } transition duration-500 ease-in-out w-full lg:w-96`"
+          :class="`${message.text ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`"
           :type="message.type"
         >
           {{ message.text }}
         </MiscMessage>
+        
         <button
           type="submit"
-          class="rounded-md transition duration-500 ease-in-out transform hover:-translate-y-1 bg-nitMaroon-600 text-white py-2 px-8"
+          class="w-full px-6 py-3 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white font-semibold rounded shadow-sm hover:shadow transition-shadow duration-300"
         >
           Change Password
         </button>
       </form>
-      <hr class="border border-stone-400 w-full lg:w-96" />
+      </div>
     </div>
   </div>
 </template>

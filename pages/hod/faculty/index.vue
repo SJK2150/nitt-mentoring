@@ -1,39 +1,46 @@
 <template>
-    <div class="p-2 flex flex-col items-center w-full mt-12">
-        <h1 class="text-2xl uppercase font-bold w-full text-left">All Faculty In {{ userStore.department }}</h1>
-        <div class="p-4 flex flex-col items-center gap-4 w-full">
-            <div class="flex flex-col items-center gap-2 w-full">
-                <div class="flex flex-row items-center justify-start lg:justify-end w-full gap-4">
-                    <div class="flex flex-col items-end gap-4">
-                        <button class="bg-nitMaroon-600 text-white rounded-md p-2"
-                            @click="_ => expandFilter = !expandFilter">Filter
-                            {{ expandFilter ? `-` : `+` }}</button>
-                        <div
-                            :class="`${expandFilter ? `max-h-[90rem]` : `max-h-0`} flex flex-col lg:flex-row gap-2 overflow-y-hidden transition-all duration-500 ease-in-out`">
-                            <input type="text" id="search_field" v-model="search"
-                                class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                                placeholder="Name" />
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold text-gray-900">Faculty in {{ userStore.department }}</h1>
+                <p class="text-gray-600 mt-1">Manage faculty mentor assignments</p>
+            </div>
+
+            <!-- Search -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+                <div class="relative max-w-md">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input 
+                        type="text" 
+                        v-model="search"
+                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        placeholder="Search by name..." 
+                    />
+                </div>
+            </div>
+
+            <!-- Faculty Grid -->
+            <div v-if="mentors" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <a v-for="mentor in computedmentors" :key="mentor.id" :href="`/hod/faculty/${mentor.id}`"
+                    class="block bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md hover:border-nitMaroon-300 transition-all">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-nitMaroon-600 flex items-center justify-center text-white font-bold text-lg">
+                            {{ mentor.name.charAt(0).toUpperCase() }}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900">{{ mentor.name }}</h3>
+                            <p class="text-sm text-gray-500">Staff ID: {{ mentor.id }}</p>
                         </div>
                     </div>
-                </div>
-                <div v-if="mentors"
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-stretch w-full gap-4 mt-5 pr-4 max-w-sm sm:max-w-2xl md:max-w-3xl lg:max-w-6xl">
-                    <ul v-for="mentor in computedmentors" :key="mentor.id"
-                        class="text-start bg-zinc-100 rounded-md p-2 block w-full">
-                        <li class="font-bold text-center">{{ mentor.name }}</li>
-                        <li class="font-semibold text-xs text-center">#{{ mentor.id }}</li>
-                        <li class="font-semibold text-xs text-center">{{ mentor.mentee_count }} Mentees</li>
-                        <li>
-                            <a :href="`/hod/faculty/${mentor.id}`"> <span class="sr-only">Manage Mentees</span>
-                                <svg class="block w-5 h-5 stroke-2 stroke-rose-700 mx-auto"
-                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path class="transition-all duration-500 transform ease-in-out" stroke-linecap="round"
-                                        stroke-linejoin="round" :d="`${AllIcons.userplus}`" />
-                                </svg>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>{{ mentor.mentee_count }} mentees</span>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
@@ -45,18 +52,14 @@ definePageMeta({
     ]
 })
 const userStore = useUserStore()
-// console.log(userStore.department)
 const mentors = await useAllFaculty();
+const search = ref("")
 
 const computedmentors = computed(() => {
-    return !expandFilter.value ? mentors :
-        mentors.filter(x => {
-            return (
-                (search.value.startsWith("#") ? String(x.id).startsWith(search.value.slice(1)) : x.name.toLowerCase().includes(search.value.toLowerCase()))
-            )
-        })
+    if (!search.value) return mentors
+    return mentors.filter(x => 
+        x.name.toLowerCase().includes(search.value.toLowerCase()) ||
+        String(x.id).includes(search.value)
+    )
 })
-
-const search = ref("")
-const expandFilter = ref(false)
 </script>

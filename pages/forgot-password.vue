@@ -1,43 +1,53 @@
 <template>
-  <div class="p-2 flex flex-col items-center w-full mt-12">
-    <div
-      class="p-4 flex flex-col items-center gap-4 bg-nitMaroon-100 border-stone-400 border-b border-r shadow-xl rounded-xl max-w-3xl w-full"
-    >
-      <h1 class="text-2xl font-bold">
-        NITT Mentoring Portal - Forgot Password
-      </h1>
-      <form
-        class="flex flex-col items-center gap-4 pt-8"
-        @submit="(e) => handleSubmit(e)"
-      >
-        <div class="flex flex-col items-center gap-2">
-          <label htmlFor="email_field" class="w-full text-start">
-            Username
-          </label>
-          <input
-            name="username"
-            id="email_field"
-            type="text"
-            placeholder="106123082"
-            class="p-2 w-full lg:w-96 rounded-md shadow-md"
-          />
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-nitMaroon-600 rounded-xl mb-4">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          </svg>
         </div>
-        <MiscMessage
-          :class="`${
-            message.text ? `opacity-100` : `opacity-0`
-          } transition duration-500 ease-in-out w-full lg:w-96`"
-          :type="message.type"
-        >
-          {{ message.text }}</MiscMessage
-        >
-        <button
-          type="submit"
-          class="rounded-md transition duration-500 ease-in-out transform hover:-translate-y-1 bg-nitMaroon-600 text-white py-2 px-8"
-        >
-          Reset Password
-        </button>
-      </form>
-      <hr class="border border-stone-400 w-full lg:w-96" />
+        <h1 class="text-2xl font-bold text-gray-900">Reset Password</h1>
+        <p class="text-gray-600 mt-2">Enter your username to receive reset instructions</p>
+      </div>
+
+      <div class="bg-green-50 rounded-lg shadow-sm border border-green-200 p-8">
+        <form @submit="handleSubmit" class="space-y-5">
+          <div>
+            <label for="email_field" class="block text-sm font-medium text-gray-700 mb-2">
+              Username
+            </label>
+            <input
+              name="username"
+              id="email_field"
+              type="text"
+              placeholder="Enter your username"
+              class="w-full px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
+            />
+          </div>
+
+          <MiscMessage
+            v-if="message.text"
+            class="transition-all duration-300"
+            :type="message.type"
+          >
+            {{ message.text }}
+          </MiscMessage>
+
+          <button
+            type="submit"
+            class="w-full bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white py-3 px-4 rounded font-medium transition-colors duration-200 shadow-sm"
+          >
+            Send Reset Link
+          </button>
+
+          <div class="text-center pt-2">
+            <a href="/login" class="text-sm text-nitMaroon-600 hover:text-nitMaroon-700 font-medium">
+              Back to login
+            </a>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>

@@ -1,94 +1,100 @@
 <template>
-    <div class="p-2 flex flex-col items-center w-full mt-12">
-        <div
-            class="p-4 flex flex-col items-center gap-4 bg-nitMaroon-100 border-stone-400 border-b border-r shadow-xl rounded-xl max-w-3xl w-full">
-            <h1 class="text-2xl font-bold">Create Student Account</h1>
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8 animate-fade-in">
+                <h1 class="text-3xl font-bold text-gray-900">Create Student Account</h1>
+                <p class="text-gray-600 mt-2">Add a new UG or PG student to the system</p>
+            </div>
             
-            <!-- Student Type Selection -->
-            <!-- <div class="flex flex-col items-center gap-4 w-full">
-                <select 
-                    v-model="studentType" 
-                    class="p-2 w-full lg:w-96 rounded-md shadow-md"
-                >
-                    <option value="UG">Undergraduate Student</option>
-                    <option value="PG">Postgraduate Student</option>
-                </select>
-            </div> -->
-
-            <form class="flex flex-col items-center gap-4 pt-8" @submit="e => handleSubmit(e)">
-                <div class="flex flex-col items-center gap-2">
-                    <label htmlFor="name_field" class="w-full text-start">
-                        Name
+            <!-- Form Card -->
+            <div class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200 animate-slide-up">
+            <form class="flex flex-col gap-6" @submit="e => handleSubmit(e)">
+                <div class="flex flex-col gap-2">
+                    <label htmlFor="name_field" class="text-sm font-medium text-gray-700">
+                        Full Name
                     </label>
-                    <input name="name" id="name_field" type="text" placeholder="John Doe"
-                        class="p-2 w-full lg:w-96 rounded-md shadow-md" />
+                    <input name="name" id="name_field" type="text" placeholder="John Doe" required
+                        class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
                 </div>
-                <div class="flex flex-col items-center gap-2">
-                    <label htmlFor="username_field" class="w-full text-start">
+                
+                <div class="flex flex-col gap-2">
+                    <label htmlFor="username_field" class="text-sm font-medium text-gray-700">
                         Roll Number
                     </label>
-                    <input name="username" id="username_field" type="text" placeholder="Roll Number"
-                        class="p-2 w-full lg:w-96 rounded-md shadow-md" />
+                    <input name="username" id="username_field" type="text" placeholder="Enter Roll Number" required
+                        class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
                 </div>
-                <div class="flex flex-col items-center gap-2">
-                    <label htmlFor="password_field" class="w-full text-start">
+                
+                <div class="flex flex-col gap-2">
+                    <label htmlFor="password_field" class="text-sm font-medium text-gray-700">
                         Password
                     </label>
-                    <input name="password" id="password_field" type="password" placeholder="Password"
-                        class="p-2 w-full lg:w-96 rounded-md shadow-md" />
+                    <input name="password" id="password_field" type="password" placeholder="Create a secure password" required
+                        class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
                 </div>
                 
                 <!-- Conditional Fields Based on Student Type -->
-                <div v-if="studentType === 'UG'" class="flex flex-row items-center gap-2">
-                    <input name="batch" type="number" class="p-2 w-full rounded-md shadow-md" placeholder="Batch" />
-                    <select name="year" class="p-2 w-full rounded-md shadow-md" >
-                        <option value="" hidden>Course</option>
-                        <option value="UG">UG</option>
-                        <option value="PG">PG</option>
-                    </select>
-                    <input name="section" type="text" class="p-2 w-full rounded-md shadow-md" placeholder="Section" />
-                </div>
-
-                <!-- <div v-else class="flex flex-col items-center gap-2 w-full">
-                    <div class="flex flex-row items-center gap-2 w-full">
-                        <input name="ugCGPA" type="number" step="0.01" min="0" max="10" 
-                            class="p-2 w-full rounded-md shadow-md" placeholder="UG CGPA" />
-                        <input name="gateScore" type="number" 
-                            class="p-2 w-full rounded-md shadow-md" placeholder="GATE Score" />
+                <div v-if="studentType === 'UG'" class="grid grid-cols-3 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-gray-700">Batch</label>
+                        <input name="batch" type="number" placeholder="2024" required
+                            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
                     </div>
-                    <div class="flex flex-row items-center gap-2 w-full">
-                        <input name="workExperience" type="text" 
-                            class="p-2 w-full rounded-md shadow-md" placeholder="Work Experience (Optional)" />
-                        <select name="year" class="p-2 w-full rounded-md shadow-md" >
-                            <option value="" hidden>Course</option>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-gray-700">Course</label>
+                        <select name="year" required
+                            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors">
+                            <option value="" hidden>Select</option>
+                            <option value="UG">UG</option>
                             <option value="PG">PG</option>
                         </select>
                     </div>
-                </div> -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-gray-700">Section</label>
+                        <input name="section" type="text" placeholder="A" required
+                            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
+                    </div>
+                </div>
 
-                <div class="flex flex-col items-center gap-2">
-                    <label htmlFor="dept_field" class="w-full text-start">
+                <div class="flex flex-col gap-2">
+                    <label htmlFor="dept_field" class="text-sm font-medium text-gray-700">
                         Department
                     </label>
-                    <select name="department" id="dept_field" placeholder="Dept"
-                        class="p-2 w-full lg:w-96 rounded-md shadow-md">
+                    <select name="department" id="dept_field" required
+                        class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors">
+                        <option value="" disabled selected>Select Department</option>
                         <option v-for="dep in dept" :key="dep.id" :value="dep.id">{{ dep.name }}</option>
                     </select>
                 </div>
                 <MiscMessage
-                    :class="`${message.text ? `opacity-100` : `opacity-0`} transition duration-500 ease-in-out w-full lg:w-96`"
+                    :class="`${message.text ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`"
                     :type="message.type">
-                    {{ message.text }}</MiscMessage>
+                    {{ message.text }}
+                </MiscMessage>
+                
                 <button type="submit"
-                    class="rounded-md transition duration-500 ease-in-out transform hover:-translate-y-1 bg-nitMaroon-600 text-white py-2 px-8">
-                    Create User
+                    class="w-full px-6 py-3 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white font-semibold rounded shadow-sm hover:shadow transition-shadow duration-300">
+                    Create Student Account
                 </button>
             </form>
-            <hr class="border border-stone-400 w-full lg:w-96" />
-            <input type="file" accept=".xlsx ,.xls" ref="fileInput" @change="handleFileChange" />
-            <button @click="uploadFile"
-                class="rounded-md transition duration-500 ease-in-out transform hover:-translate-y-1 bg-nitMaroon-600 text-white py-2 px-8">Upload
-                Excel File</button>
+            </div>
+            
+            <!-- Bulk Upload Section -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 mt-6 animate-slide-up" style="animation-delay: 0.1s">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Bulk Upload</h2>
+                <p class="text-gray-600 mb-6">Upload an Excel file (.xlsx or .xls) to create multiple student accounts at once</p>
+                
+                <div class="flex flex-col gap-4">
+                    <input type="file" accept=".xlsx,.xls" ref="fileInput" @change="handleFileChange"
+                        class="px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-nitMaroon-400 transition-colors cursor-pointer" />
+                    
+                    <button @click="uploadFile"
+                        class="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                        Upload Excel File
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </template>

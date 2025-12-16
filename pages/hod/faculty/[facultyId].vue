@@ -1,67 +1,124 @@
 <template>
-    <div class="flex flex-col gap-2">
-        <InfoMentor v-if="faculty" :mentor="{ ...faculty, menteeCount: faculty.mentees.length }" />
-        <div class="flex flex-row items-center justify-start lg:justify-end w-full gap-4">
-            <div class="flex flex-col items-end gap-4">
-                <div class="flex flex-row items-center gap-4">
-                    <button class="bg-green-600 text-white rounded-md p-2" @click="pushChanges">Commit Changes</button>
-                    <button class="bg-nitMaroon-600 text-white rounded-md p-2"
-                        @click="_ => expandFilter = !expandFilter">Filter
-                        {{ expandFilter ? `-` : `+` }}</button>
-                </div>
-                <div
-                    :class="`${expandFilter ? `max-h-[90rem]` : `max-h-0`} flex flex-col lg:flex-row gap-2 overflow-y-hidden transition-all duration-500 ease-in-out`">
-                    <input type="text" id="search_field" v-model="batch"
-                        class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                        placeholder="Batch" />
-                    <input type="text" id="search_field" v-model="classSection"
-                        class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                        placeholder="Section" />
-                        <input type="text" id="search_field" v-model="name"
-                        class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                        placeholder="Name" />
-                        <input type="text" id="search_field" v-model="regNo"
-                        class="w-48 lg:w-72 p-2 rounded-md border-nitMaroon-600 border bg-nitMaroon-50"
-                        placeholder="Reg No" />
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+        <div class="max-w-7xl mx-auto">
+            <InfoMentor v-if="faculty" :mentor="{ ...faculty, menteeCount: faculty.mentees.length }" />
+            
+            <!-- Actions Bar -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 my-6 animate-slide-up">
+                <button 
+                    @click="pushChanges"
+                    class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Commit Changes
+                    </span>
+                </button>
+                
+                <button 
+                    @click="_ => expandFilter = !expandFilter"
+                    class="px-6 py-3 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        {{ expandFilter ? 'Hide' : 'Show' }} Filters
+                    </span>
+                </button>
+            </div>
+            
+            <!-- Filter Section -->
+            <div
+                :class="`${expandFilter ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mb-6`">
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <input type="text" v-model="batch"
+                            class="px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
+                            placeholder="Filter by Batch" />
+                        <input type="text" v-model="classSection"
+                            class="px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
+                            placeholder="Filter by Section" />
+                        <input type="text" v-model="name"
+                            class="px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
+                            placeholder="Filter by Name" />
+                        <input type="text" v-model="regNo"
+                            class="px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
+                            placeholder="Filter by Reg No" />
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="flex flex-wrap w-full justify-end items-center gap-5">
-            <select v-model="selectedMeetingNumber" class="border-2 border-nitMaroon-600 rounded-md outline-none md:min-w-[250px] py-1.5">
-                <option value="">Select Meeting Number</option>
-                <option v-for="(meeting, index) in meetingNumbers" :value="meeting.meeting_number">{{ meeting?.meeting_number }}</option>
-            </select>
-            <button :class="['text-white', 'rounded-md', 'p-2', !selectedMeetingNumber ?'bg-nitMaroon-300' : 'bg-nitMaroon-600']" :disabled="!selectedMeetingNumber" @click="exportToPDF">Export to PDF</button>
-        </div>
-        <MiscMessage :class="`${message.text ? `opacity-100` : `opacity-0`} transition duration-500 ease-in-out`"
-            :type="message.type">
-            {{ message.text }}</MiscMessage>
-        <table class="table-auto border-collapse w-full max-w-sm lg:max-w-full">
-            <thead class="bg-nitMaroon-600 text-white text-xs lg:text-base">
-                <th>Assigned</th>
-                <th>Meetings Details</th>
-                <th>Reg #</th>
-                <th>Name</th>
-                <th>Year</th>
-                <th>Section</th>
-                <th>Mentor</th>
+            <!-- Export Section -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 mb-6 animate-slide-up" style="animation-delay: 0.1s">
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <select v-model="selectedMeetingNumber" 
+                        class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none">
+                        <option value="">Select Meeting Number</option>
+                        <option v-for="(meeting, index) in meetingNumbers" :key="index" :value="meeting.meeting_number">
+                            Meeting #{{ meeting?.meeting_number }}
+                        </option>
+                    </select>
+                    <button 
+                        :disabled="!selectedMeetingNumber" 
+                        @click="exportToPDF"
+                        :class="[
+                            'px-6 py-3 font-semibold rounded-xl shadow-lg transition-all duration-300',
+                            !selectedMeetingNumber 
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-md'
+                        ]">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Export to PDF
+                        </span>
+                    </button>
+                </div>
+            </div>
+            
+            <MiscMessage :class="`${message.text ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 mb-4`"
+                :type="message.type">
+                {{ message.text }}
+            </MiscMessage>
+            
+            <!-- Students Table -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 animate-slide-up" style="animation-delay: 0.2s">
+            <table class="table-auto border-collapse w-full">
+            <thead class="bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white">
+                <th class="px-4 py-4 text-left font-semibold">Assigned</th>
+                <th class="px-4 py-4 text-left font-semibold">Meetings</th>
+                <th class="px-4 py-4 text-left font-semibold">Reg #</th>
+                <th class="px-4 py-4 text-left font-semibold">Name</th>
+                <th class="px-4 py-4 text-left font-semibold">Year</th>
+                <th class="px-4 py-4 text-left font-semibold">Section</th>
+                <th class="px-4 py-4 text-left font-semibold">Mentor</th>
             </thead>
             <tbody>
                 <tr v-for="mentee in computedMentees" :key="mentee.register_number"
-                    class="text-xs lg:text-base text-center odd:bg-nitMaroon-100 even:bg-zinc-100 border-t border-nitMaroon-100 border-spacing-y-2">
-                    <td><input type="checkbox" :checked="mentee.mentor_id === Number(facultyId)"
+                    class="text-sm border-t border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-4">
+                        <input type="checkbox" 
+                            :checked="mentee.mentor_id === Number(facultyId)"
                             :disabled="Boolean(mentee.mentor_id && mentee.mentor_id !== -1 && (mentee.mentor_id !== Number(facultyId)))"
-                            @change="e => updateMentor(e, mentee.register_number)" /></td>
-                    <td class=" font-bold"><a :href = "`/dashboard/mentees/${mentee.register_number}/meetings`">click here</a></td>
-                    <td>{{ mentee.register_number }}</td>
-                    <td>{{ mentee.name }}</td>
-                    <td>{{ mentee.year }}</td>
-                    <td>{{ mentee.section }}</td>
-                    <td>{{ mentee.mentor?.name }}</td>
+                            @change="e => updateMentor(e, mentee.register_number)"
+                            class="w-4 h-4 text-nitMaroon-600 rounded focus:ring-nitMaroon-500" />
+                    </td>
+                    <td class="px-4 py-4">
+                        <a :href="`/dashboard/mentees/${mentee.register_number}/meetings`" 
+                            class="text-nitMaroon-600 hover:text-nitMaroon-700 font-semibold hover:underline">
+                            View Details
+                        </a>
+                    </td>
+                    <td class="px-4 py-4 font-medium">{{ mentee.register_number }}</td>
+                    <td class="px-4 py-4">{{ mentee.name }}</td>
+                    <td class="px-4 py-4">{{ mentee.year }}</td>
+                    <td class="px-4 py-4">{{ mentee.section }}</td>
+                    <td class="px-4 py-4 text-gray-600">{{ mentee.mentor?.name }}</td>
                 </tr>
             </tbody>
         </table>
+        </div>
         <!-- Start of PDF Template -->
         <div ref="pdfContainer" :style="{ visibility: exportToPdfMode ? 'visible' : 'hidden' }">
             <div class="flex items-center justify-center gap-4 mb-3">
@@ -103,7 +160,7 @@
                 </tbody>
             </table>
         </div>
-        <!-- End of PDF Template -->
+        </div>
     </div>
 </template>
 

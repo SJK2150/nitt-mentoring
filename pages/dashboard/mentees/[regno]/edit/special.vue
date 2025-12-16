@@ -2,7 +2,7 @@
     <div class="lg:px-4 mx-auto w-full flex flex-col items-start lg:items-center">
         <InfoMentee v-if="mentee" :mentee="mentee" />
         <div v-if="mentee"
-            class="p-4 flex flex-col items-center gap-4 bg-nitMaroon-100 border-stone-400 border-b border-r shadow-xl rounded-xl max-w-6xl w-full">
+            class="p-4 flex flex-col items-center gap-4 bg-nitMaroon-100 border-stone-400 border-b border-r shadow-lg rounded-xl max-w-6xl w-full">
             <h1 class="text-2xl font-bold">Update Student Info</h1>
             <form class="flex flex-col items-center gap-4 pt-8" @submit="e => handleSubmit(e)">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
