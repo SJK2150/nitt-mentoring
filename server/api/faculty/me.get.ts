@@ -26,10 +26,20 @@ export default defineEventHandler(async (e) => {
     }
     const user = await client.prisma.faculty.findFirst({
       where: { user_id: Number(jwtPayload.id) },
-      include: { mentees: true, department: true },
+      include: { 
+        department: true,
+        // Only include mentee count, not full mentee data
+        _count: {
+          select: { mentees: true }
+        }
+      },
     });
     if (user) {
-      return client.manager.createFaculty(user);
+      return {
+        ...client.manager.createPartialFaculty(user),
+        mentee_count: user._count.mentees,
+        department: user.department
+      };
     } else {
       throw createError({
         statusCode: 404,

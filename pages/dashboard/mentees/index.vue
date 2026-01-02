@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div class="min-h-screen bg-nitMaroon-50 p-6">
         <div class="max-w-7xl mx-auto">
             <div class="mb-6">
                 <h1 class="text-3xl font-bold text-gray-900">Your Mentees</h1>
@@ -7,47 +7,53 @@
             </div>
 
             <!-- Filters and Export -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+            <div class="bg-gray-100 rounded-lg shadow-sm border border-gray-300 p-6 mb-6">
                 <div class="flex flex-col lg:flex-row gap-4 mb-4">
                     <input 
                         type="text" 
                         v-model="batch"
-                        class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
                         placeholder="Filter by batch" 
                     />
                     <input 
                         type="text" 
                         v-model="classSection"
-                        class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
                         placeholder="Filter by section" 
                     />
                     <input 
                         type="text" 
                         v-model="name"
-                        class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
                         placeholder="Filter by name" 
                     />
                     <input 
                         type="text" 
                         v-model="regNo"
-                        class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
                         placeholder="Filter by reg no" 
                     />
+                </div>
+                
+                <!-- Results Count -->
+                <div v-if="batch || classSection || name || regNo" class="text-sm text-gray-600 font-medium">
+                    {{ computedMentees.length }} mentee{{ computedMentees.length !== 1 ? 's' : '' }} found
                 </div>
                 
                 <div class="flex flex-wrap gap-3 items-center">
                     <select 
                         v-model="selectedMeetingNumber" 
-                        class="flex-1 min-w-[200px] px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500">
+                        class="flex-1 min-w-[200px] px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors">
                         <option value="">Select Meeting Number</option>
                         <option v-for="meeting in meetingNumbers" :value="meeting.meeting_number">{{ meeting?.meeting_number }}</option>
                     </select>
                     <button 
                         :disabled="!selectedMeetingNumber"
                         @click="exportToPDF"
-                        :class="['px-6 py-2.5 rounded-lg font-medium transition-colors', selectedMeetingNumber ? 'bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed']">
+                        :class="['px-6 py-3 rounded font-medium transition-colors shadow-sm', selectedMeetingNumber ? 'bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed']">
                         Export to PDF
                     </button>
+                    <span v-if="!selectedMeetingNumber" class="text-sm text-gray-500 italic">Select a meeting number first</span>
                 </div>
             </div>
 

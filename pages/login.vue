@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+    <div class="min-h-screen bg-nitMaroon-50 flex items-center justify-center p-6">
         <div class="w-full max-w-md">
             <!-- Logo/Header -->
             <div class="text-center mb-8">
@@ -13,7 +13,7 @@
             </div>
 
             <!-- Login Form -->
-            <div class="bg-green-50 rounded-lg shadow-sm border border-green-200 p-8">
+            <div class="bg-gray-100 rounded-lg shadow-sm border border-gray-300 p-8">
                 <form @submit="handleSubmit" class="space-y-5">
                     <div>
                         <label for="username_field" class="block text-sm font-medium text-gray-700 mb-2">
@@ -58,7 +58,7 @@
 
                     <button 
                         type="submit"
-                        class="w-full bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white py-3 px-4 rounded font-medium transition-colors duration-200 shadow-sm">
+                        class="bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white py-3 px-4 rounded font-medium transition-colors duration-200 shadow-sm">
                         Sign In
                     </button>
                 </form>

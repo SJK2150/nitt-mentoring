@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div class="min-h-screen bg-nitMaroon-50 p-8">
         <div class="max-w-2xl mx-auto">
             <!-- Header -->
             <div class="mb-8 animate-fade-in">
@@ -8,7 +8,7 @@
             </div>
             
             <!-- Form Card -->
-            <div class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200 animate-slide-up">
+            <div class="bg-gray-100 rounded-lg shadow-sm p-8 border border-gray-300 animate-slide-up">
             <form class="flex flex-col gap-6" @submit="e => handleSubmit(e)">
                 <div class="flex flex-col gap-2">
                     <label htmlFor="name_field" class="text-sm font-medium text-gray-700">
@@ -34,26 +34,47 @@
                         class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
                 </div>
                 
-                <!-- Conditional Fields Based on Student Type -->
-                <div v-if="studentType === 'UG'" class="grid grid-cols-3 gap-4">
+                <!-- Course Selection -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-gray-700">Course</label>
+                    <select name="year" v-model="studentType" required
+                        class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors">
+                        <option value="" hidden>Select Course</option>
+                        <option value="UG">UG</option>
+                        <option value="PG">PG</option>
+                    </select>
+                </div>
+                
+                <!-- UG-Specific Fields -->
+                <div v-if="studentType === 'UG'" class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                         <label class="text-sm font-medium text-gray-700">Batch</label>
                         <input name="batch" type="number" placeholder="2024" required
                             class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
                     </div>
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium text-gray-700">Course</label>
-                        <select name="year" required
-                            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors">
-                            <option value="" hidden>Select</option>
-                            <option value="UG">UG</option>
-                            <option value="PG">PG</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col gap-2">
                         <label class="text-sm font-medium text-gray-700">Section</label>
                         <input name="section" type="text" placeholder="A" required
                             class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
+                    </div>
+                </div>
+                
+                <!-- PG-Specific Fields -->
+                <div v-if="studentType === 'PG'" class="grid grid-cols-1 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-gray-700">UG CGPA (Optional)</label>
+                        <input name="ugCGPA" type="number" step="0.01" min="0" max="10" placeholder="8.5"
+                            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-gray-700">GATE Score (Optional)</label>
+                        <input name="gateScore" type="number" min="0" max="1000" placeholder="750"
+                            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-gray-700">Work Experience (Optional)</label>
+                        <textarea name="workExperience" placeholder="e.g., 2 years at XYZ Company" rows="2"
+                            class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors resize-none"></textarea>
                     </div>
                 </div>
 
@@ -74,23 +95,23 @@
                 </MiscMessage>
                 
                 <button type="submit"
-                    class="w-full px-6 py-3 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white font-semibold rounded shadow-sm hover:shadow transition-shadow duration-300">
+                    class="px-6 py-3 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white font-semibold rounded shadow-sm hover:shadow transition-shadow duration-300">
                     Create Student Account
                 </button>
             </form>
             </div>
             
             <!-- Bulk Upload Section -->
-            <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 mt-6 animate-slide-up" style="animation-delay: 0.1s">
+            <div class="bg-gray-100 rounded-lg shadow-sm border border-gray-300 p-8 mt-6 animate-slide-up" style="animation-delay: 0.1s">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Bulk Upload</h2>
                 <p class="text-gray-600 mb-6">Upload an Excel file (.xlsx or .xls) to create multiple student accounts at once</p>
                 
                 <div class="flex flex-col gap-4">
                     <input type="file" accept=".xlsx,.xls" ref="fileInput" @change="handleFileChange"
-                        class="px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-nitMaroon-400 transition-colors cursor-pointer" />
+                        class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-nitMaroon-600 file:text-white file:font-medium file:cursor-pointer hover:file:bg-nitMaroon-700" />
                     
                     <button @click="uploadFile"
-                        class="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                        class="px-6 py-3 bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white font-medium rounded shadow-sm transition-colors duration-200">
                         Upload Excel File
                     </button>
                 </div>
@@ -127,16 +148,33 @@ const handleFileUpload = (file: File) => {
         const wb = read(arrayBuffer);
 
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const data: studentData[] = utils.sheet_to_json<studentData>(ws);
+        const rawData: any[] = utils.sheet_to_json(ws);
 
-        data.forEach((element) => {
-            element.regno = element.regno.toString();
-            element.ugCGPA = 0;
-            element.gateScore = 0
-            element.workExperience = ""
+        // Process data based on student type
+        const processedData: studentData[] = rawData.map((element) => {
+            const processed: studentData = {
+                name: element.name,
+                regno: element.regno?.toString() || '',
+                password: element.password || 'defaultPassword123', // Provide default if not in Excel
+                department: element.department,
+                year: element.year,
+                // Only set UG-specific fields if the student is UG
+                ...(element.year === 'UG' && {
+                    batch: element.batch,
+                    section: element.section
+                }),
+                // Only set PG-specific fields if the student is PG
+                ...(element.year === 'PG' && {
+                    ugCGPA: element.ugCGPA || 0,
+                    gateScore: element.gateScore || 0,
+                    workExperience: element.workExperience || ''
+                })
+            };
+
+            return processed;
         });
 
-        stud.value = data;
+        stud.value = processedData;
     };
 
     reader.readAsArrayBuffer(file);
@@ -212,11 +250,14 @@ const handleSubmit = async (e: Event) => {
     if (creds.year === 'UG') {
         creds.batch = Number(formData.get("batch"));
         creds.section = formData.get("section") as string;
-    } else {
-        creds.ugCGPA =0;
-        creds.gateScore = 0;
-        creds.workExperience = "";
-        console.log(creds);
+    } else if (creds.year === 'PG') {
+        const ugCGPA = formData.get("ugCGPA");
+        const gateScore = formData.get("gateScore");
+        const workExp = formData.get("workExperience");
+        
+        creds.ugCGPA = ugCGPA ? Number(ugCGPA) : 0;
+        creds.gateScore = gateScore ? Number(gateScore) : 0;
+        creds.workExperience = workExp ? workExp as string : "";
     }
 
     const auth = useCookie<string>("nitt_token");

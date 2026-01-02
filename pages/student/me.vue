@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-if="mentee"
-            :class="`bg-nitMaroon-100/50 flex flex-col space-y-4 ${mentee.enable_edit_profile ? `` : `cursor-not-allowed`}`">
+            :class="`bg-nitMaroon-50 flex flex-col space-y-4 ${mentee.enable_edit_profile ? `` : `cursor-not-allowed`}`">
             <div :class="`p-2 ${mentee.enable_edit_profile ? `` : `pointer-events-none`}`">
                 <!-- BASIC STUDENT INFO -->
                 <div class="flex flex-col items-center justify-center gap-4 mt-5 ml-2 mx-auto font-bold text-xl">

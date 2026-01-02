@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div class="min-h-screen bg-nitMaroon-50 p-8">
         <div class="max-w-2xl mx-auto">
             <!-- Header -->
             <div class="mb-8 animate-fade-in">
@@ -8,7 +8,7 @@
             </div>
             
             <!-- Form Card -->
-            <div class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200 animate-slide-up">
+            <div class="bg-gray-100 rounded-lg shadow-sm p-8 border border-gray-300 animate-slide-up">
             <form class="flex flex-col gap-6" @submit="e => handleSubmit(e)">
                 <div class="flex flex-col gap-2">
                     <label htmlFor="current-password_field" class="text-sm font-medium text-gray-700">
@@ -40,8 +40,8 @@
                 </MiscMessage>
                 
                 <button type="submit"
-                    class="w-full px-6 py-3 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white font-semibold rounded shadow-sm hover:shadow transition-shadow duration-300">
-                    Change Password
+                    class="px-6 py-3 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white font-semibold rounded shadow-sm hover:shadow transition-shadow duration-300">
+                    Update Password
                 </button>
             </form>
             </div>

@@ -4,6 +4,7 @@ export async function useUser() {
   const auth = useCookie<string>("nitt_token");
   if (!auth.value) return false;
 
+  // Use $fetch with a simple in-memory cache check
   const user = await $fetch<User>(`/api/users/me`, {
     method: "GET",
     headers: { "Authorization": `Bearer ${auth.value}` },
@@ -16,25 +17,17 @@ export async function useFaculty(
 ): Promise<(Faculty & { menteeCount: number }) | false> {
   const auth = useCookie<string>("nitt_token");
   if (!auth.value) return false;
-  if (id) {
-    const user = await $fetch<(Faculty & { menteeCount: number })>(
-      `/api/faculty/${id}`,
-      {
-        method: "GET",
-        headers: { "Authorization": `Bearer ${auth.value}` },
-      },
-    );
-    return user;
-  } else {
-    const user = await $fetch<(Faculty & { menteeCount: number })>(
-      `/api/faculty/me`,
-      {
-        method: "GET",
-        headers: { "Authorization": `Bearer ${auth.value}` },
-      },
-    );
-    return user;
-  }
+  
+  const endpoint = id ? `/api/faculty/${id}` : `/api/faculty/me`;
+  
+  const user = await $fetch<(Faculty & { menteeCount: number })>(
+    endpoint,
+    {
+      method: "GET",
+      headers: { "Authorization": `Bearer ${auth.value}` },
+    },
+  );
+  return user;
 }
 
 export async function useAllFaculty(): Promise<

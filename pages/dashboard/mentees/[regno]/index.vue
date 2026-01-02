@@ -1,12 +1,12 @@
 <template>
-    <div v-if="mentee" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div v-if="mentee" class="min-h-screen bg-nitMaroon-50 p-8">
         <div class="max-w-7xl mx-auto">
             <InfoMentee v-if="mentee" :mentee="mentee" />
             
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-4 my-6 animate-slide-up">
                 <a v-if="mentee" :href="`/dashboard/mentees/${mentee.register_number}/edit/special`"
-                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                    class="px-6 py-3 bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white font-semibold rounded-lg transition-colors duration-300">
                     <span class="flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -16,7 +16,7 @@
                 </a>
                 
                 <a v-if="mentee" :href="`/dashboard/mentees/${mentee.register_number}/meetings/new`"
-                    class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                    class="px-6 py-3 bg-nitMaroon-500 hover:bg-nitMaroon-600 text-white font-semibold rounded-lg transition-colors duration-300">
                     <span class="flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -31,7 +31,7 @@
                 <h1 class="text-2xl font-bold text-gray-900 mb-4">Meetings</h1>
                 <div v-if="meetings.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div v-for="meeting, i in meetings" :key="`meeting_${meeting.id}`"
-                        class="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-300 group">
+                        class="bg-white rounded-lg p-6 border border-nitMaroon-200 hover:border-nitMaroon-300 transition-all duration-300 group">
                         <div class="flex items-start justify-between mb-3">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 group-hover:text-nitMaroon-600 transition-colors">Meeting #{{ i+1 }}</h3>
@@ -44,7 +44,7 @@
                         <p class="text-gray-700 line-clamp-3">{{ meeting.discussion }}</p>
                     </div>
                 </div>
-                <div v-else class="bg-white rounded-2xl shadow-lg p-12 border border-gray-200 text-center">
+                <div v-else class="bg-white rounded-lg p-12 border border-nitMaroon-200 text-center">
                     <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>

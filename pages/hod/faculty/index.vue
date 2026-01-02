@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <div class="min-h-screen bg-nitMaroon-50 p-6">
         <div class="max-w-7xl mx-auto">
             <div class="mb-6">
                 <h1 class="text-3xl font-bold text-gray-900">Faculty in {{ userStore.department }}</h1>
@@ -7,7 +7,7 @@
             </div>
 
             <!-- Search -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+            <div class="bg-white rounded-lg border border-nitMaroon-200 p-4 mb-6">
                 <div class="relative max-w-md">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -15,7 +15,7 @@
                     <input 
                         type="text" 
                         v-model="search"
-                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
+                        class="w-full pl-10 pr-4 py-2.5 bg-nitMaroon-50 border border-nitMaroon-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent"
                         placeholder="Search by name..." 
                     />
                 </div>
@@ -24,7 +24,7 @@
             <!-- Faculty Grid -->
             <div v-if="mentors" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <a v-for="mentor in computedmentors" :key="mentor.id" :href="`/hod/faculty/${mentor.id}`"
-                    class="block bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md hover:border-nitMaroon-300 transition-all">
+                    class="block bg-white rounded-lg p-5 border border-nitMaroon-200 hover:border-nitMaroon-300 transition-all">
                     <div class="flex items-center gap-4 mb-4">
                         <div class="w-12 h-12 rounded-full bg-nitMaroon-600 flex items-center justify-center text-white font-bold text-lg">
                             {{ mentor.name.charAt(0).toUpperCase() }}

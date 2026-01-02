@@ -1,29 +1,26 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-nitMaroon-50 to-gray-100 p-8">
+    <div class="min-h-screen bg-nitMaroon-50 p-8">
         <div class="max-w-7xl mx-auto">
             <!-- Header Section -->
-            <div class="mb-8 animate-fade-in">
+            <div class="mb-8">
                 <h1 class="text-4xl font-bold text-gray-900 mb-2 tracking-tight">User Management</h1>
                 <p class="text-gray-600 text-lg">Manage faculty and student accounts</p>
             </div>
             
             <!-- Tab Navigation with Modern Design -->
-            <div class="mb-8 animate-slide-up">
+            <div class="mb-8">
                 <div class="flex flex-wrap gap-2">
                     <button 
                         v-for="tab in tabs" 
                         :key="tab"
                         @click="activeTab = tab"
                         :class="[
-                            'relative px-5 py-2 rounded-full font-semibold text-sm transition-all duration-300 group overflow-hidden',
+                            'relative px-5 py-2 rounded-lg font-semibold text-sm transition-all duration-300 group overflow-hidden border',
                             activeTab === tab 
-                                ? 'bg-nitMaroon-600 text-white shadow-md' 
-                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-nitMaroon-400'
+                                ? getActiveTabClass(tab)
+                                : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200 hover:border-gray-300'
                         ]"
                     >
-                        <!-- Animated background on active -->
-                        <span v-if="activeTab === tab" class="absolute inset-0 bg-gradient-to-r from-nitMaroon-500 to-nitMaroon-700 opacity-10"></span>
-                        
                         <!-- Tab label -->
                         <span class="relative z-10 flex items-center gap-1.5">
                             <!-- Icon based on tab -->
@@ -38,18 +35,13 @@
                             </svg>
                             {{ tab }}
                         </span>
-                        
-                        <!-- Count badge -->
-                        <span v-if="activeTab === tab" class="absolute -top-2 -right-2 w-5 h-5 bg-white text-nitMaroon-600 rounded-full flex items-center justify-center text-xs font-bold shadow-md">
-                            {{ displayedUsers?.length || 0 }}
-                        </span>
                     </button>
                 </div>
             </div>
 
             <div class="flex flex-col gap-4">
                 <!-- Search Bar -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 animate-slide-up" style="animation-delay: 0.1s;">
+                <div class="bg-white rounded-lg border border-nitMaroon-200 p-4">
                     <div class="flex items-center gap-3">
                         <div class="relative flex-1 max-w-sm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -60,7 +52,7 @@
                             <input 
                                 type="text" 
                                 v-model="search"
-                                class="w-full pl-10 pr-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
+                                class="w-full pl-10 pr-3 py-2 bg-nitMaroon-50 border border-nitMaroon-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500"
                                 placeholder="Search by name or ID..." 
                             />
                         </div>
@@ -81,19 +73,18 @@
                 
                 <!-- Faculty Tab -->
                 <div v-else-if="activeTab === 'Faculty' && displayedUsers"
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in">
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div v-for="(user, index) in displayedUsers" :key="user.id"
-                        class="group relative bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 animate-scale-in"
-                        :style="`animation-delay: ${index * 0.05}s`">
+                        class="group relative bg-white rounded-lg overflow-hidden border border-nitMaroon-200 hover:border-nitMaroon-300 transition-all duration-300">
                         
-                        <!-- Header Section (Colored Banner) -->
-                        <div class="h-16 bg-gradient-to-r from-nitMaroon-500 to-nitMaroon-700 relative group-hover:shadow-md transition-all duration-300"></div>
+                        <!-- Header Section (Colored Banner) - Material 3 Elevation -->
+                        <div class="h-16 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 relative group-hover:shadow-md transition-all duration-300"></div>
                         
                         <!-- Body Section -->
                         <div class="relative px-4 pt-0 pb-4">
                             <!-- Avatar overlapping header -->
                             <div class="absolute -top-10 left-4">
-                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-nitMaroon-500 to-nitMaroon-700 flex items-center justify-center text-white font-bold text-lg shadow-md border-4 border-white">
+                                <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-nitMaroon-600 to-nitMaroon-700 flex items-center justify-center text-white font-bold text-lg shadow-md border-4 border-white">
                                     {{ user.name.charAt(0).toUpperCase() }}
                                 </div>
                             </div>
@@ -108,7 +99,7 @@
                             </div>
                             
                             <!-- Description/Info -->
-                            <p class="text-xs text-gray-500 mb-3 line-clamp-1">ID: {{ user.id }}</p>
+                            <p class="text-xs text-gray-500 mb-3 line-clamp-1">Staff ID: {{ user.username }}</p>
                             
                             <!-- Footer Section (Action) -->
                             <button @click="setUser(user.username)" 
@@ -124,19 +115,28 @@
 
                 <!-- UG/PG Students Tab -->
                 <div v-else-if="(activeTab === 'UG Students' || activeTab === 'PG Students') && displayedUsers"
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in">
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div v-for="(user, index) in displayedUsers" :key="user.id"
-                        class="group relative bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 animate-scale-in"
-                        :style="`animation-delay: ${index * 0.05}s`">
+                        class="group relative bg-white rounded-lg overflow-hidden border transition-all duration-300"
+                        :class="activeTab === 'UG Students' ? 'border-nitMaroon-200 hover:border-nitMaroon-300' : 'border-nitMaroon-200 hover:border-nitMaroon-300'">
                         
-                        <!-- Header Section (Colored Banner) -->
-                        <div class="h-16 bg-gradient-to-r from-nitMaroon-500 to-nitMaroon-700 relative group-hover:shadow-md transition-all duration-300"></div>
+                        <!-- Header Section (Colored Banner) - Material 3 Elevation -->
+                        <div 
+                            :class="activeTab === 'UG Students' 
+                                ? 'bg-gradient-to-r from-nitMaroon-500 to-nitMaroon-600' 
+                                : 'bg-gradient-to-r from-nitMaroon-400 to-nitMaroon-500'"
+                            class="h-16 relative group-hover:shadow-md transition-all duration-300">
+                        </div>
                         
                         <!-- Body Section -->
                         <div class="relative px-4 pt-0 pb-4">
                             <!-- Avatar overlapping header -->
                             <div class="absolute -top-10 left-4">
-                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-nitMaroon-500 to-nitMaroon-700 flex items-center justify-center text-white font-bold text-lg shadow-md border-4 border-white">
+                                <div 
+                                    :class="activeTab === 'UG Students'
+                                        ? 'bg-gradient-to-br from-nitMaroon-500 to-nitMaroon-600'
+                                        : 'bg-gradient-to-br from-nitMaroon-400 to-nitMaroon-500'"
+                                    class="w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md border-4 border-white">
                                     {{ user.name.charAt(0).toUpperCase() }}
                                 </div>
                             </div>
@@ -145,7 +145,13 @@
                             <div class="pt-6 mb-2">
                                 <div class="flex items-start justify-between gap-2 mb-1">
                                     <h3 class="font-semibold text-sm text-gray-900 flex-1 line-clamp-1">{{ user.name }}</h3>
-                                    <span class="px-2 py-0.5 bg-nitMaroon-100 text-nitMaroon-700 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0">{{ user.year }}</span>
+                                    <span 
+                                        :class="activeTab === 'UG Students'
+                                            ? 'bg-nitMaroon-100 text-nitMaroon-700'
+                                            : 'bg-nitMaroon-100 text-nitMaroon-700'"
+                                        class="px-2 py-0.5 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0">
+                                        {{ user.year }}
+                                    </span>
                                 </div>
                                 <p class="text-xs text-gray-600 line-clamp-1">Roll: {{ user.register_no }}</p>
                             </div>
@@ -155,7 +161,10 @@
                             
                             <!-- Footer Section (Action) -->
                             <button @click="setUser(user.username)" 
-                                class="w-1/2 py-1.5 px-3 bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white rounded text-xs font-medium transition-colors duration-300 flex items-center justify-center gap-1">
+                                :class="activeTab === 'UG Students'
+                                    ? 'bg-nitMaroon-600 hover:bg-nitMaroon-700'
+                                    : 'bg-nitMaroon-500 hover:bg-nitMaroon-600'"
+                                class="w-1/2 py-1.5 px-3 text-white rounded text-xs font-medium transition-colors duration-300 flex items-center justify-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                 </svg>
@@ -236,10 +245,10 @@
                                 {{ message.text }}
                             </MiscMessage>
                             
-                            <button 
+                            <button
                                 type="submit"
-                                class="w-full py-3.5 px-6 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white rounded-xl font-semibold hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="py-3.5 px-6 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 text-white rounded-xl font-semibold hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Update Password
@@ -274,18 +283,36 @@ const userStore = useUserStore()
 const newPass = ref("")
 const confirmPass = ref("")
 
-// Server-side data fetching - more reliable
+// Material Design 3 Tab Color Helper
+const getActiveTabClass = (tab: string) => {
+    switch(tab) {
+        case 'Faculty':
+            return 'bg-nitMaroon-700 text-white border-nitMaroon-700 shadow-sm'
+        case 'UG Students':
+            return 'bg-nitMaroon-600 text-white border-nitMaroon-600 shadow-sm'
+        case 'PG Students':
+            return 'bg-nitMaroon-500 text-white border-nitMaroon-500 shadow-sm'
+        default:
+            return 'bg-nitMaroon-600 text-white border-nitMaroon-600 shadow-sm'
+    }
+}
+
+// Server-side data fetching - optimized with lazy loading
 const auth = useCookie<string>("nitt_token")
 
-const { data: facultyData, refresh: refreshFaculty } = await useFetch('/api/faculty/all', {
+const { data: facultyData, pending: facultyLoading } = await useFetch('/api/faculty/all', {
     headers: { "Authorization": `Bearer ${auth.value}` },
-    key: 'faculty-list'
+    key: 'faculty-list',
+    lazy: true
 })
 
-const { data: studentsData, refresh: refreshStudents } = await useFetch('/api/mentees/all', {
+const { data: studentsData, pending: studentsLoading } = await useFetch('/api/mentees/all', {
     headers: { "Authorization": `Bearer ${auth.value}` },
-    key: 'students-list'
+    key: 'students-list',
+    lazy: true
 })
+
+const loading = computed(() => facultyLoading.value || studentsLoading.value)
 
 const facultyUsers = computed(() => facultyData.value || [])
 const ugStudents = computed(() => (studentsData.value || []).filter((s: any) => s.year === 'UG'))

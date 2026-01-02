@@ -7,7 +7,8 @@ const client = new Client();
 
 export default defineEventHandler(async (event) => {
   try {
-    const { username } = await readBody(event);
+    const body = await readBody(event);
+    const { username } = body || {};
 
     if (!username) {
       return {

@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div class="min-h-screen bg-nitMaroon-50 p-8">
         <div class="max-w-7xl mx-auto">
             <InfoMentor v-if="faculty" :mentor="{ ...faculty, menteeCount: faculty.mentees.length }" />
             
@@ -7,7 +7,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 my-6 animate-slide-up">
                 <button 
                     @click="pushChanges"
-                    class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                    class="px-6 py-3 bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white font-semibold rounded-lg transition-colors duration-300">
                     <span class="flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -31,19 +31,19 @@
             <!-- Filter Section -->
             <div
                 :class="`${expandFilter ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mb-6`">
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                <div class="bg-white rounded-lg p-6 border border-nitMaroon-200">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <input type="text" v-model="batch"
-                            class="px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
+                            class="px-4 py-3 rounded border border-nitMaroon-200 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
                             placeholder="Filter by Batch" />
                         <input type="text" v-model="classSection"
-                            class="px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
+                            class="px-4 py-3 rounded border border-nitMaroon-200 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
                             placeholder="Filter by Section" />
                         <input type="text" v-model="name"
-                            class="px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
+                            class="px-4 py-3 rounded border border-nitMaroon-200 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
                             placeholder="Filter by Name" />
                         <input type="text" v-model="regNo"
-                            class="px-4 py-3 rounded-xl border border-gray-300 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
+                            class="px-4 py-3 rounded border border-nitMaroon-200 focus:border-nitMaroon-500 focus:ring-2 focus:ring-nitMaroon-200 transition-all outline-none"
                             placeholder="Filter by Reg No" />
                     </div>
                 </div>

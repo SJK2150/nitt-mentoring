@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+  <div class="min-h-screen bg-nitMaroon-50 p-8">
     <div class="max-w-4xl mx-auto">
       <!-- Header -->
       <div class="flex items-center justify-between mb-8 animate-fade-in">
@@ -19,7 +19,7 @@
         </NuxtLink>
       </div>
 
-      <div v-if="loading" class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200 text-center animate-slide-up">
+      <div v-if="loading" class="bg-gray-100 rounded-lg shadow-sm p-8 border border-gray-300 text-center animate-slide-up">
         <div class="flex items-center justify-center gap-3">
           <div class="w-6 h-6 border-4 border-nitMaroon-600 border-t-transparent rounded-full animate-spin"></div>
           <p class="text-gray-600 font-medium">Loading student information...</p>
@@ -28,7 +28,7 @@
 
       <div v-else-if="mentee" class="animate-slide-up">
         <!-- Basic Information Card -->
-        <div class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200">
+        <div class="bg-gray-100 rounded-lg shadow-sm p-8 border border-gray-300">
           <h2 class="text-2xl font-bold text-gray-900 mb-6">Basic Information</h2>
           <form @submit.prevent="updateBasicInfo" class="flex flex-col gap-6">
           <div>
@@ -82,7 +82,7 @@
           </div>
           <button 
             type="submit" 
-            class="w-full bg-nitMaroon-600 text-white py-3 px-4 rounded shadow-sm hover:shadow hover:bg-nitMaroon-700 transition-all font-semibold"
+            class="bg-nitMaroon-600 text-white py-3 px-4 rounded shadow-sm hover:shadow hover:bg-nitMaroon-700 transition-all font-semibold"
             :disabled="updating"
           >
             {{ updating ? 'Updating...' : 'Update Basic Info' }}
@@ -91,7 +91,7 @@
         </div>
       </div>
 
-      <div v-else class="bg-green-50 rounded-lg shadow-sm p-8 border border-green-200 text-center animate-slide-up">
+      <div v-else class="bg-gray-100 rounded-lg shadow-sm p-8 border border-gray-300 text-center animate-slide-up">
         <p class="text-red-500 font-semibold text-lg">Student not found</p>
       </div>
     </div>

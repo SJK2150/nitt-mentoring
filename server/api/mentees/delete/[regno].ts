@@ -24,8 +24,30 @@ export default defineEventHandler(async (e) => {
   }
 
   try {
-    await client.prisma.students.delete({
+    // First get the student to find the user_id
+    const student = await client.prisma.students.findUnique({
       where: { register_no: regno },
+      select: { user_id: true }
+    });
+
+    if (!student) {
+      throw createError({
+        statusCode: 404,
+        statusText: "Student not found.",
+      });
+    }
+
+    // Delete both student and user records in a transaction
+    await client.prisma.$transaction(async (prisma) => {
+      // Delete student record
+      await prisma.students.delete({
+        where: { register_no: regno },
+      });
+
+      // Delete user record
+      await prisma.users.delete({
+        where: { id: student.user_id },
+      });
     });
   } catch (error) {
     throw createError({

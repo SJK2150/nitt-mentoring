@@ -1,8 +1,8 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div class="min-h-screen bg-nitMaroon-50 p-8">
         <div class="max-w-4xl mx-auto">
             <!-- Welcome Card -->
-            <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 animate-fade-in">
+            <div class="bg-white rounded-lg border border-nitMaroon-200 p-8 animate-fade-in">
                 <div class="flex items-center gap-4">
                     <!-- Admin Icon Badge -->
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-nitMaroon-600 to-nitMaroon-700 flex items-center justify-center shadow-lg">

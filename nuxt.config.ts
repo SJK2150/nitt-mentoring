@@ -24,12 +24,26 @@ export default defineNuxtConfig({
         { rel: "shortcut icon", type: "image/x-icon", href: "/favicon.ico" },
       ],
     },
-    /*    pageTransition: {
-      name: "rotate",
-      mode: "out-in",
-    },*/
-    layoutTransition: { name: "layout", mode: "out-in" },
+    layoutTransition: false, // Disable layout transitions for faster navigation
+    pageTransition: false, // Disable page transitions for faster navigation
   },
   devtools: { enabled: true },
   modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
+  
+  // Performance optimizations
+  experimental: {
+    payloadExtraction: false, // Disable for faster dev mode
+    renderJsonPayloads: false,
+  },
+  
+  // Faster builds
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: undefined, // Disable chunk splitting in dev
+        },
+      },
+    },
+  },
 });

@@ -1,6 +1,13 @@
 <template>
     <header class="fixed top-0 left-0 h-screen z-50">
-        <nav class="h-full bg-gradient-to-b from-nitMaroon-700 via-nitMaroon-650 to-nitMaroon-700 shadow-2xl transition-all duration-300"
+        <!-- Backdrop overlay when sidebar is open - closes sidebar when clicked -->
+        <div 
+            v-if="navState" 
+            @click="navState = false"
+            class="fixed inset-0 bg-black/50 z-40"
+        ></div>
+        
+        <nav ref="sidebarRef" class="h-full bg-gradient-to-b from-nitMaroon-700 via-nitMaroon-650 to-nitMaroon-700 shadow-2xl transition-all duration-300 relative z-50"
             :class="navState ? 'w-64' : 'w-20'">
             <div class="flex flex-col h-full">
                 <!-- Header with Logo and Toggle -->
@@ -29,7 +36,7 @@
                         :href="route.action"
                         :key="route.key"
                         :title="route.toolTip"
-                        class="group flex items-center gap-3 px-3 py-3 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 relative overflow-hidden">
+                        class="group flex items-center gap-3 px-3 py-3 rounded-xl text-white/80 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/10 transition-all duration-200 relative overflow-hidden">
                         <!-- Hover effect background -->
                         <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         
@@ -109,9 +116,31 @@ const navState = ref(true)
 const route = useRoute()
 const userStore = useUserStore()
 const auth = useCookie<string>("nitt_token")
+const sidebarRef = ref<HTMLElement | null>(null)
+
 const signOut = () => {
     auth.value = ""
     userStore.signOut()
     navigateTo("/login")
+}
+
+// Close sidebar when clicking outside on mobile/tablet
+if (process.client) {
+    onMounted(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (navState.value && sidebarRef.value && !sidebarRef.value.contains(event.target as Node)) {
+                // Only close on smaller screens
+                if (window.innerWidth < 1024) {
+                    navState.value = false
+                }
+            }
+        }
+
+        document.addEventListener('click', handleClickOutside)
+
+        onUnmounted(() => {
+            document.removeEventListener('click', handleClickOutside)
+        })
+    })
 }
 </script>

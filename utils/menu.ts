@@ -50,19 +50,19 @@ export const MainMenu = [
     level: 2,
   },
   {
-    name: "Add Students",
-    action: "/admin/students/new",
-    key: "studentadd",
-    toolTip: "Add Students",
-    routeIcon: `${AllIcons.userplus}`,
-    level: 2,
-  },
-  {
     name: "All Users",
     action: "/admin/users",
     key: "allusers",
     toolTip: "All Users",
     routeIcon: `${AllIcons.users}`,
+    level: 3,
+  },
+  {
+    name: "Add Students",
+    action: "/admin/students/new",
+    key: "studentadd",
+    toolTip: "Add Students",
+    routeIcon: `${AllIcons.userplus}`,
     level: 3,
   },
   {
