@@ -1,8 +1,9 @@
 <template>
-    <div class="min-h-screen bg-nitMaroon-50 p-6">
-        <div class="max-w-7xl mx-auto">
+    <div class="min-h-screen bg-nitMaroon-50 p-6 relative">
+        <MiscGeometricBg />
+        <div class="max-w-7xl mx-auto relative z-10">
             <div class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-900">Faculty in {{ userStore.department }}</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Faculty in {{ displayDepartment }}</h1>
                 <p class="text-gray-600 mt-1">Manage faculty mentor assignments</p>
             </div>
 
@@ -54,6 +55,15 @@ definePageMeta({
 const userStore = useUserStore()
 const mentors = await useAllFaculty();
 const search = ref("")
+
+const displayDepartment = computed(() => {
+    if (userStore.department && userStore.department !== "NONE") {
+        return userStore.department
+    }
+
+    const firstDept = mentors[0]?.department
+    return firstDept?.name || firstDept?.id || "Department"
+})
 
 const computedmentors = computed(() => {
     if (!search.value) return mentors

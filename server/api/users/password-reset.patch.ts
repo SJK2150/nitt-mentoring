@@ -1,51 +1,58 @@
 import { Client } from "../../utils/database";
 import { hash } from "bcrypt";
-import jwt from "jsonwebtoken";
-import config from "~/config";
+import { passwordResetVerifySchema } from "../../utils/validation.js";
+import { verifyResetCode, getRemainingAttempts } from "../../utils/passwordResetCodes.js";
 
 const client = new Client();
 
 export default defineEventHandler(async (event) => {
   try {
-    const { username, newPassword, token } = await readBody(event);
-
-    if (!username || !newPassword || !token) {
-      return {
+    const body = await readBody(event);
+    
+    // Validate input with Zod
+    const result = passwordResetVerifySchema.safeParse(body);
+    if (!result.success) {
+      const validationMessage = result.error.issues[0]?.message || "Invalid input";
+      throw createError({
         statusCode: 400,
-        body: { message: "All fields are required" },
-      };
-    }
-    console.log(username, newPassword, token);
-    let decodedToken: { username: string };
-    try {
-      decodedToken = jwt.verify(token, config.JWT_KEY) as { username: string };
-    } catch (error) {
-      return {
-        statusCode: 401,
-        body: { message: "Invalid or expired token" },
-      };
+        statusMessage: "Invalid input",
+        message: validationMessage,
+      });
     }
 
-    if (decodedToken.username !== username) {
-      return {
+    const { username, code, newPassword } = result.data;
+
+    // Verify the reset code
+    const isValid = verifyResetCode(username, code);
+    
+    if (!isValid) {
+      const remaining = getRemainingAttempts(username);
+      throw createError({
         statusCode: 401,
-        body: { message: "Pls check your username... " },
-      };
+        statusMessage: remaining > 0 
+          ? `Invalid or expired code. ${remaining} attempts remaining.`
+          : "Too many failed attempts. Please request a new code.",
+      });
     }
 
+    // Find user
     const user = await client.prisma.users.findUnique({
       where: { username: username },
     });
 
     if (!user) {
-      return {
+      throw createError({
         statusCode: 404,
-        body: { message: "User not found" },
-      };
+        statusMessage: "User not found",
+      });
     }
 
-    const encryptedPass = await hash(newPassword, 10);
+    // Hash new password with environment BCRYPT_SALT
+    const config = useRuntimeConfig();
+    const saltRounds = parseInt(config.bcryptSalt || '12');
+    const encryptedPass = await hash(newPassword, saltRounds);
 
+    // Update password
     await client.prisma.users.update({
       where: { username: username },
       data: { password: encryptedPass },
@@ -55,11 +62,16 @@ export default defineEventHandler(async (event) => {
       statusCode: 200,
       body: { message: "Password changed successfully" },
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in password change:", error);
-    return {
+    
+    if (error.statusCode) {
+      throw error;
+    }
+    
+    throw createError({
       statusCode: 500,
-      body: { message: "An error occurred while processing your request" },
-    };
+      statusMessage: "An error occurred while processing your request",
+    });
   }
 });

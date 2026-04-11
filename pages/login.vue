@@ -1,6 +1,7 @@
 <template>
-    <div class="min-h-screen bg-nitMaroon-50 flex items-center justify-center p-6">
-        <div class="w-full max-w-md">
+    <div class="h-screen overflow-hidden bg-nitMaroon-50 flex items-start justify-center pt-12 px-6 relative">
+        <MiscGeometricBg />
+        <div class="w-full max-w-md relative z-10">
             <!-- Logo/Header -->
             <div class="text-center mb-8">
                 <div class="inline-flex items-center justify-center w-16 h-16 bg-nitMaroon-600 rounded-xl mb-4">
@@ -70,8 +71,6 @@
 <script setup lang="ts">
 const route = useRoute();
 
-const token = useCookie<string>("nitt_token")
-
 // If the user was redirected via middleware
 let redirect = route.query.redirect as string;
 // Else
@@ -93,6 +92,16 @@ if(loginerr){
     }
 }
 
+// Prevent scrolling on mount
+onMounted(() => {
+    document.body.style.overflow = 'hidden';
+});
+
+// Restore scrolling on unmount
+onUnmounted(() => {
+    document.body.style.overflow = '';
+});
+
 const handleSubmit = async (e: Event) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -101,37 +110,33 @@ const handleSubmit = async (e: Event) => {
         username: formData.get("username"),
         password: formData.get("password"),
     };
-    await useFetch<{ token: string }>(`/api/users/me`, {
-        method: "POST", body: JSON.stringify(creds),
-        onResponse({ request, response, options }) {
-            // Set localStorage value and redirect to where they were
-            if(response._data.message!='Error'){
-                token.value = response._data.token
-                message.value.type = "info"
-                message.value.text = "Logging you in."
-                navigateTo(redirect)
-            }
-        },
-        onResponseError({ request, response, options }) {
-            message.value.type="error"
-            switch (response.status) {
-                case 400:
-                    // this won't happen
-                    navigateTo('/?loginerr=missing')
-                    break;
-                case 401:
-                    navigateTo('/?loginerr=incorrect')
-                    break;
-                case 404:
-                    navigateTo('/?loginerr=noUser')
-                    break;
-                default:
-                    navigateTo('/?loginerr=unknown')
-                    break;
-            }
-            abortNavigation()
-
+    
+    try {
+        const response = await $fetch<{ message: string }>(`/api/users/me`, {
+            method: "POST", 
+            body: creds,
+        });
+        
+        // Cookie is set by server with httpOnly flag
+        console.log('Login successful, redirecting to:', redirect);
+        message.value.type = "info";
+        message.value.text = "Logging you in.";
+        
+        // Use window.location for a hard redirect to ensure middleware runs
+        window.location.href = redirect;
+    } catch (error: any) {
+        console.error('Login error:', error);
+        message.value.type = "error";
+        
+        if (error.statusCode === 401) {
+            message.value.text = "Username / Password combination is incorrect.";
+        } else if (error.statusCode === 400) {
+            message.value.text = "Missing Fields.";
+        } else if (error.statusCode === 503) {
+            message.value.text = "Service temporarily unavailable. Please try again in a minute.";
+        } else {
+            message.value.text = "An error occurred during login.";
         }
-    })
+    }
 };
 </script>

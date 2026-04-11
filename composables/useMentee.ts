@@ -1,14 +1,13 @@
 import type { PartialStudent, Student } from "@/types/types.js";
 
 export async function useMe(): Promise<Student | false> {
-  const auth = useCookie<string>("nitt_token");
-  if (!auth.value) return false;
   try {
+    const headers = process.server ? useRequestHeaders(["cookie"]) : undefined;
     const user = await $fetch<Student>(
       `/api/students/whoami`,
       {
         method: "GET",
-        headers: { "Authorization": `Bearer ${auth.value}` },
+        headers,
       },
     );
     return user;
@@ -22,15 +21,14 @@ export async function useMentee(
   regno: string,
 ): Promise<Student | false>;
 export async function useMentee(regno?: string) {
-  const auth = useCookie<string>("nitt_token");
-  if (!auth.value) return false;
+  const headers = process.server ? useRequestHeaders(["cookie"]) : undefined;
   if (regno) {
     try {
       const user = await $fetch<Student>(
         `/api/mentees/${regno}`,
         {
           method: "GET",
-          headers: { "Authorization": `Bearer ${auth.value}` },
+          headers,
         },
       );
       return user;
@@ -40,7 +38,7 @@ export async function useMentee(regno?: string) {
   } else {
     const users = await $fetch<Student[]>(`/api/mentees/me`, {
       method: "GET",
-      headers: { "Authorization": `Bearer ${auth.value}` },
+      headers,
     });
     return users;
   }
@@ -51,15 +49,14 @@ export async function useSudoMentee(
   regno: string,
 ): Promise<Student | false>;
 export async function useSudoMentee(regno?: string) {
-  const auth = useCookie<string>("nitt_token");
-  if (!auth.value) return false;
+  const headers = process.server ? useRequestHeaders(["cookie"]) : undefined;
   if (regno) {
     try {
       const user = await $fetch<PartialStudent>(
         `/api/mentees/${regno}`,
         {
           method: "GET",
-          headers: { "Authorization": `Bearer ${auth.value}` },
+          headers,
         },
       );
       return user;
@@ -70,11 +67,12 @@ export async function useSudoMentee(regno?: string) {
     try {
       const users = await $fetch<PartialStudent[]>(`/api/mentees/dept`, {
         method: "GET",
-        headers: { "Authorization": `Bearer ${auth.value}` },
+        headers,
       });
       return users;
     } catch (e) {
       console.log(e);
+      return [] as PartialStudent[];
     }
   }
 }

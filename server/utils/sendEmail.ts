@@ -81,18 +81,65 @@ const createHtmlContent = (resetLink: string): string => `
 
 `;
 
-export async function sendEmail(to: string, resetLink: string) {
+export async function sendEmail(to: string, subject: string, body: string, isHtml: boolean = false) {
+  const sendWithSendGridApi = async () => {
+    const sendGridApiKey = process.env.SENDGRID_API_KEY || config.SMTP_PASS;
+
+    if (!sendGridApiKey || !sendGridApiKey.startsWith("SG.")) {
+      throw new Error("SendGrid API key not available for HTTPS fallback");
+    }
+
+    const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${sendGridApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: to }] }],
+        from: { email: config.EMAIL_FROM },
+        subject,
+        content: [
+          {
+            type: isHtml ? "text/html" : "text/plain",
+            value: body,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`SendGrid API failed: ${response.status} ${errorText}`);
+    }
+
+    console.log("Email sent via SendGrid HTTPS API to:", to);
+  };
+
   try {
-    const body = createHtmlContent(resetLink);
     await transporter.sendMail({
       from: config.EMAIL_FROM,
       to,
-      subject: subject,
-      html: body,
+      subject,
+      ...(isHtml ? { html: body } : { text: body }),
     });
-    console.log("Email sent successfully");
+    console.log("Email sent successfully to:", to);
   } catch (error) {
-    console.error("Error sending email:", error);
-    throw new Error("Failed to send email");
+    console.error("SMTP send failed, trying HTTPS fallback:", error);
+    try {
+      await sendWithSendGridApi();
+    } catch (fallbackError) {
+      console.error("HTTPS email fallback failed:", fallbackError);
+      throw new Error("Failed to send email");
+    }
   }
+}
+
+/**
+ * Send password reset email with link (deprecated - use sendPasswordResetCode instead)
+ */
+export async function sendPasswordResetLink(to: string, resetLink: string) {
+  const subject = "Reset Your Password on NITT Mentoring Portal";
+  const body = createHtmlContent(resetLink);
+  await sendEmail(to, subject, body, true);
 }

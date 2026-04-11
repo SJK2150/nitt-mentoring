@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen bg-nitMaroon-50 p-8">
-    <div class="max-w-4xl mx-auto">
+  <div class="min-h-screen bg-nitMaroon-50 p-8 relative">
+    <MiscGeometricBg />
+    <div class="max-w-7xl mx-auto relative z-10">
       <!-- Header -->
       <div class="flex items-center justify-between mb-8 animate-fade-in">
         <div>
@@ -92,7 +93,7 @@
       </div>
 
       <div v-else class="bg-gray-100 rounded-lg shadow-sm p-8 border border-gray-300 text-center animate-slide-up">
-        <p class="text-red-500 font-semibold text-lg">Student not found</p>
+        <p class="text-red-500 font-semibold text-lg">{{ loadError || 'Student not found' }}</p>
       </div>
     </div>
   </div>
@@ -113,6 +114,7 @@ const mentee = ref<PartialStudent | null>(null)
 const departments = ref<Department[]>([])
 const loading = ref(true)
 const updating = ref(false)
+const loadError = ref('')
 
 // Form data
 const basicForm = ref({
@@ -128,16 +130,8 @@ const basicForm = ref({
 onMounted(async () => {
   try {
     const [studentData, deptData] = await Promise.all([
-      $fetch(`/api/mentees/${regno}`, {
-        headers: {
-          Authorization: `Bearer ${useCookie('nitt_token').value}`
-        }
-      }),
-      $fetch('/api/dept', {
-        headers: {
-          Authorization: `Bearer ${useCookie('nitt_token').value}`
-        }
-      })
+      $fetch(`/api/mentees/${regno}`),
+      $fetch('/api/dept')
     ]) as [PartialStudent, Department[]]
 
     mentee.value = studentData
@@ -152,8 +146,16 @@ onMounted(async () => {
       batch: studentData.batch || 0,
       department_id: studentData.department?.id || ''
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching student data:', error)
+    const status = error?.status || error?.statusCode
+    if (status === 404) {
+      loadError.value = 'Student not found'
+    } else if (status === 401) {
+      loadError.value = 'Session expired. Please login again.'
+    } else {
+      loadError.value = 'Unable to load student details right now.'
+    }
   } finally {
     loading.value = false
   }
@@ -164,9 +166,6 @@ async function updateBasicInfo() {
   try {
     await $fetch(`/api/mentees/update/${regno}/basic`, {
       method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${useCookie('nitt_token').value}`
-      },
       body: {
         name: basicForm.value.name,
         year: basicForm.value.year,
@@ -177,9 +176,9 @@ async function updateBasicInfo() {
     })
     
     alert('Basic information updated successfully!')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating basic info:', error)
-    alert('Failed to update basic information')
+    alert(error?.data?.statusText || error?.data?.statusMessage || 'Failed to update basic information')
   } finally {
     updating.value = false
   }

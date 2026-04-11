@@ -1,13 +1,13 @@
 <template>
     <header class="fixed top-0 left-0 h-screen z-50">
-        <!-- Backdrop overlay when sidebar is open - closes sidebar when clicked -->
+        <!-- Backdrop overlay when sidebar is open on mobile - closes sidebar when clicked -->
         <div 
             v-if="navState" 
             @click="navState = false"
-            class="fixed inset-0 bg-black/50 z-40"
+            class="fixed inset-0 bg-black/50 z-40 lg:hidden"
         ></div>
         
-        <nav ref="sidebarRef" class="h-full bg-gradient-to-b from-nitMaroon-700 via-nitMaroon-650 to-nitMaroon-700 shadow-2xl transition-all duration-300 relative z-50"
+        <nav ref="navRef" class="h-full bg-gradient-to-b from-nitMaroon-700 via-nitMaroon-650 to-nitMaroon-700 shadow-2xl border-r border-nitMaroon-900/20 transition-all duration-300 relative z-50"
             :class="navState ? 'w-64' : 'w-20'">
             <div class="flex flex-col h-full">
                 <!-- Header with Logo and Toggle -->
@@ -31,8 +31,8 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div v-if="userStore.loggedIn" class="flex-1 overflow-y-auto py-6 px-3 space-y-2">
-                    <a v-for="route in MainMenu.filter(x => x.level <= userStore.level && (userStore.level === 3 ? x.level === 3 : true) &&(x.key=='mentees'?userStore.level==1:true))" 
+                <div v-if="userStore.loggedIn" :class="['flex-1 overflow-y-auto py-6 px-3 space-y-2', userStore.level === 2 ? 'no-scrollbar' : '']">
+                    <a v-for="route in visibleMenuRoutes" 
                         :href="route.action"
                         :key="route.key"
                         :title="route.toolTip"
@@ -112,27 +112,34 @@
 </template>
 
 <script setup lang="ts">
-const navState = ref(true)
+const navState = ref(false)
 const route = useRoute()
 const userStore = useUserStore()
-const auth = useCookie<string>("nitt_token")
-const sidebarRef = ref<HTMLElement | null>(null)
+const navRef = ref<HTMLElement | null>(null)
 
-const signOut = () => {
-    auth.value = ""
-    userStore.signOut()
-    navigateTo("/login")
+const visibleMenuRoutes = computed(() => {
+    if (userStore.level === 3) {
+        return MainMenu.filter((item) => item.level === 3)
+    }
+
+    return MainMenu.filter((item) => item.level === userStore.level)
+})
+
+const signOut = async () => {
+    // Call logout endpoint to clear httpOnly cookie
+    await $fetch('/api/users/logout', {
+        method: 'POST',
+    });
+    userStore.signOut();
+    navigateTo("/login");
 }
 
-// Close sidebar when clicking outside on mobile/tablet
+// Close sidebar when clicking outside
 if (process.client) {
     onMounted(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (navState.value && sidebarRef.value && !sidebarRef.value.contains(event.target as Node)) {
-                // Only close on smaller screens
-                if (window.innerWidth < 1024) {
-                    navState.value = false
-                }
+            if (navState.value && navRef.value && !navRef.value.contains(event.target as Node)) {
+                navState.value = false
             }
         }
 
@@ -144,3 +151,14 @@ if (process.client) {
     })
 }
 </script>
+
+<style scoped>
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+</style>

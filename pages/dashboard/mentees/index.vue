@@ -1,43 +1,59 @@
 <template>
-    <div class="min-h-screen bg-nitMaroon-50 p-6">
-        <div class="max-w-7xl mx-auto">
-            <div class="mb-6">
+    <div class="min-h-screen bg-nitMaroon-50 p-4 md:p-6 relative">
+        <MiscGeometricBg />
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="mb-6 bg-white/80 backdrop-blur rounded-2xl border border-nitMaroon-200 p-5 shadow-sm">
                 <h1 class="text-3xl font-bold text-gray-900">Your Mentees</h1>
-                <p class="text-gray-600 mt-1">Manage mentee meetings and records</p>
+                <p class="text-gray-600 mt-1">Manage profile access, meetings, and records</p>
             </div>
 
             <!-- Filters and Export -->
-            <div class="bg-gray-100 rounded-lg shadow-sm border border-gray-300 p-6 mb-6">
+            <div class="bg-gray-100/95 backdrop-blur rounded-2xl shadow-sm border border-gray-300 p-6 mb-6 sticky top-20 z-30">
                 <div class="flex flex-col lg:flex-row gap-4 mb-4">
-                    <input 
-                        type="text" 
+                    <select 
                         v-model="batch"
-                        class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
-                        placeholder="Filter by batch" 
-                    />
+                        class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors">
+                        <option value="">All Batches</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
                     <input 
                         type="text" 
                         v-model="classSection"
                         class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
-                        placeholder="Filter by section" 
+                        placeholder="Filter by section (e.g. A, B, C)" 
                     />
                     <input 
                         type="text" 
                         v-model="name"
                         class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
-                        placeholder="Filter by name" 
+                        placeholder="Search by name" 
                     />
                     <input 
                         type="text" 
                         v-model="regNo"
                         class="flex-1 px-4 py-3 bg-yellow-50 border border-gray-300 rounded focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors"
-                        placeholder="Filter by reg no" 
+                        placeholder="Search by reg no" 
                     />
                 </div>
                 
                 <!-- Results Count -->
-                <div v-if="batch || classSection || name || regNo" class="text-sm text-gray-600 font-medium">
+                <div v-if="hasActiveFilters" class="text-sm text-gray-600 font-medium mb-3">
                     {{ computedMentees.length }} mentee{{ computedMentees.length !== 1 ? 's' : '' }} found
+                </div>
+
+                <div v-if="hasActiveFilters" class="flex flex-wrap items-center gap-2 mb-4">
+                    <span v-for="chip in activeFilterChips" :key="chip" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-white border border-nitMaroon-200 text-nitMaroon-700">
+                        {{ chip }}
+                    </span>
+                    <button
+                        @click="clearFilters"
+                        class="px-3 py-1 text-xs font-semibold rounded-full bg-nitMaroon-700 text-white hover:bg-nitMaroon-800 transition-colors"
+                    >
+                        Clear All
+                    </button>
                 </div>
                 
                 <div class="flex flex-wrap gap-3 items-center">
@@ -58,7 +74,7 @@
             </div>
 
             <!-- Mentees List -->
-            <div class="space-y-4">
+            <div class="space-y-3 md:space-y-4">
                 <EditableMentee v-for="mentee in computedMentees" :mentee="mentee" :key="mentee?.meeting_number" />
             </div>
         </div>
@@ -130,23 +146,41 @@ watch(selectedMeetingNumber, async (newMeetingNumber: string) => {
 });
 
 const computedMentees = computed(() => {
-    return !expandFilter.value ? mentees :
-        mentees.filter(x => {
-            return (
-                (batch.value ? x.batch.toString().startsWith(batch.value) : true) &&
-                (classSection.value ? x.section === classSection.value.toUpperCase() : true) &&
-                (name.value ? x.name.toLowerCase().includes(name.value.toLowerCase()) : true) &&
-                (regNo.value ? x.register_number.startsWith(regNo.value) : true)
-            );
-        });
+    return mentees.filter(x => {
+        return (
+            (batch.value ? String(x.batch ?? "") === batch.value : true) &&
+            (classSection.value ? x.section?.toUpperCase() === classSection.value.toUpperCase() : true) &&
+            (name.value ? x.name.toLowerCase().includes(name.value.toLowerCase()) : true) &&
+            (regNo.value ? x.register_number.startsWith(regNo.value) : true)
+        );
+    });
 });
+
+const hasActiveFilters = computed(() => {
+    return Boolean(batch.value || classSection.value || name.value || regNo.value);
+});
+
+const activeFilterChips = computed(() => {
+    const chips: string[] = [];
+    if (batch.value) chips.push(`Batch ${batch.value}`);
+    if (classSection.value) chips.push(`Section ${classSection.value.toUpperCase()}`);
+    if (name.value) chips.push(`Name: ${name.value}`);
+    if (regNo.value) chips.push(`Reg: ${regNo.value}`);
+    return chips;
+});
+
+const clearFilters = () => {
+    batch.value = "";
+    classSection.value = "";
+    name.value = "";
+    regNo.value = "";
+};
 
 const batch = ref("");
 const name = ref("");
 const regNo = ref("");
 const classSection = ref("");
 const pdfContainer = ref("");
-const expandFilter = ref(false);
 </script>
 
 <script lang="ts">

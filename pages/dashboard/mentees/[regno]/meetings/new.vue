@@ -1,6 +1,7 @@
 <template>
-    <div class="min-h-screen bg-nitMaroon-50 p-6">
-        <div class="max-w-4xl mx-auto">
+    <div class="min-h-screen bg-nitMaroon-50 p-6 relative">
+        <MiscGeometricBg />
+        <div class="max-w-4xl mx-auto relative z-10">
             <!-- Mentee Info Card -->
             <div class="mb-6 animate-fade-in">
                 <InfoMentee v-if="mentee" :mentee="mentee" />
@@ -100,7 +101,6 @@ const router = useRouter()
 const regNo = route.params.regno;
 const mentee = await useMentee(regNo as string)
 if (!mentee) nextTick(() => router.go(-1))
-const auth = useCookie<string>("nitt_token");
 
 const addMeeting = async (e: Event) => {
     e.preventDefault();
@@ -112,18 +112,22 @@ const addMeeting = async (e: Event) => {
         discussion: formData.get("discussion_field"),
         mentee_id: regNo,
     };
-    await useFetch<{ token: string }>(`/api/meetings/new`, {
-        method: "POST", body: JSON.stringify(creds),
-        headers: { "Authorization": `Bearer ${auth.value}` },
-        onResponse({ request, response, options }) {
-            navigateTo(`/dashboard/mentees/${regNo}/meetings`)
-        },
-        onResponseError({ request, response, options }) {
-            alert("An error occurred");
-            console.error(response);
-            
-
+    try {
+        await $fetch(`/api/meetings/new`, {
+            method: "POST",
+            body: creds,
+            credentials: "include",
+        })
+        navigateTo(`/dashboard/mentees/${regNo}/meetings`)
+    } catch (err: any) {
+        if (err?.statusCode === 401) {
+            const redirectPath = `/dashboard/mentees/${regNo}/meetings/new`;
+            navigateTo(`/login?redirect=${encodeURIComponent(redirectPath)}`);
+            return;
         }
-    })
+        const msg = err?.data?.statusMessage || err?.data?.message || "An error occurred";
+        alert(msg);
+        console.error(err);
+    }
 }
 </script>

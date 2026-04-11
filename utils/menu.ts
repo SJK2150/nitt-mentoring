@@ -2,6 +2,22 @@ import { AllIcons } from "./icons.js";
 
 export const MainMenu = [
   {
+    name: "My Profile",
+    action: "/student/me",
+    key: "student-profile",
+    toolTip: "My Profile",
+    routeIcon: `${AllIcons.home}`,
+    level: 0,
+  },
+  {
+    name: "Change Password",
+    action: "/student/password",
+    key: "student-change-password",
+    toolTip: "Change Password",
+    routeIcon: `${AllIcons.passwordChange}`,
+    level: 0,
+  },
+  {
     name: "Dashboard",
     action: "/dashboard/",
     key: "dashboard",
@@ -15,6 +31,14 @@ export const MainMenu = [
     key: "dashboard",
     toolTip: "Dashboard",
     routeIcon: `${AllIcons.home}`,
+    level: 3,
+  },
+  {
+    name: "Change Password",
+    action: "/dashboard/password",
+    key: "change-password-admin",
+    toolTip: "Change Password",
+    routeIcon: `${AllIcons.passwordChange}`,
     level: 3,
   },
   {
@@ -38,7 +62,7 @@ export const MainMenu = [
     action: "/hod/faculty",
     key: "faculty",
     toolTip: "Faculty List",
-    routeIcon: `${AllIcons.services}`,
+    routeIcon: `${AllIcons.users}`,
     level: 2,
   },
   {
@@ -50,19 +74,19 @@ export const MainMenu = [
     level: 2,
   },
   {
+    name: "Add Students",
+    action: "/hod/students/new",
+    key: "studentadd",
+    toolTip: "Add Students",
+    routeIcon: `${AllIcons.userplus}`,
+    level: 2,
+  },
+  {
     name: "All Users",
     action: "/admin/users",
     key: "allusers",
     toolTip: "All Users",
     routeIcon: `${AllIcons.users}`,
-    level: 3,
-  },
-  {
-    name: "Add Students",
-    action: "/admin/students/new",
-    key: "studentadd",
-    toolTip: "Add Students",
-    routeIcon: `${AllIcons.userplus}`,
     level: 3,
   },
   {

@@ -13,9 +13,13 @@
 </template>
 
 <script setup lang="ts">
-const { turnedOn } = defineProps<{ turnedOn: boolean }>()
+const props = defineProps<{ turnedOn: boolean }>()
 const emit = defineEmits<{ (event: 'update', state: boolean): void }>()
-const toggled = ref(turnedOn)
+const toggled = ref(props.turnedOn)
+
+watch(() => props.turnedOn, (value) => {
+    toggled.value = value
+})
 
 const toggle = () => {
     toggled.value = !toggled.value

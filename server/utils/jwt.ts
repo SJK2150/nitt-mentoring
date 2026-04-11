@@ -1,5 +1,6 @@
 import { jwtVerify, SignJWT } from "jose";
 import config from "./../../config";
+import { isTokenRevoked } from "./tokenRevocation.js";
 
 // Encode KEY into a Uint8Array
 const secret = new Uint8Array(Buffer.from(config.JWT_KEY, "hex"));
@@ -24,6 +25,11 @@ export async function verifyJwt(
   token: string
 ): Promise<{ id: string; level: number; exp: number } | false> {
   try {
+    // Check if token has been revoked (e.g., after logout)
+    if (isTokenRevoked(token)) {
+      return false;
+    }
+    
     const data = await jwtVerify(token, secret);
     // Check whether the payload has "id" and "exp".
     // This is most likely true.

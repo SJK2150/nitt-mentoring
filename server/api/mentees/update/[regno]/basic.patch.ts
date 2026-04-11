@@ -1,16 +1,16 @@
 import { Client } from "../../../../utils/database.js";
+import { getTokenFromEvent } from "../../../../utils/auth.js";
 
 const client = new Client();
 export default defineEventHandler(async (e) => {
-  const auth = getHeader(e, "Authorization");
-  if (!auth || !auth.startsWith("Bearer ")) {
+  const token = getTokenFromEvent(e);
+  if (!token) {
     throw createError({
       statusCode: 401,
       statusText: "Not logged in.",
     });
   }
 
-  const token = auth.slice(7);
   const jwtPayload = await verifyJwt(token);
   if (!jwtPayload || (Date.now() / 1000) > jwtPayload.exp) {
     throw createError({

@@ -1,42 +1,86 @@
 <template>
     <div :class="`p-2 flex flex-col items-stretch`">
-        <div class="p-2 rounded-xl items-center flex justify-between bg-nitMaroon-100">
-            <div class="flex items-center gap-8">
-                <div class="flex flex-col items-stretch gap-2" title="Allow Editing">
-                    <MiscSwitch :turned-on="mentee.enable_edit_profile ?? true" @update="toggleEditProfile" />
-                </div>
-                <div class="flex flex-col items-start gap-2">
-
-                    <div class="text-base sm:text-xl lg:text-2xl font-semibold">{{ mentee.name }} #{{
-                        mentee.register_number
-                        }}</div>
-                    <div class="py-2 flex flex-row gap-2">
-                        <a :href="`/dashboard/mentees/${mentee.register_number}/meetings`"
-                            class="flex items-center gap-2 max-w-xs mx-auto bg-nitMaroon-700 rounded-md py-2 px-4">
-                            <span class="text-rose-200 text-xs sm:text-base">Check Meeting
-                                Details</span>
-                            <svg class="block w-5 h-5 stroke-2 stroke-rose-200 mx-auto"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                <path class="transition-all duration-500 transform ease-in-out" stroke-linecap="round"
-                                    stroke-linejoin="round" :d="`${AllIcons.userplus}`" />
-                            </svg>
-                        </a>
+        <div class="rounded-2xl border border-nitMaroon-200 bg-white/90 backdrop-blur shadow-sm overflow-hidden">
+            <div class="h-1 bg-gradient-to-r from-nitMaroon-600 via-nitMaroon-400 to-nitMaroon-200"></div>
+            <div class="p-4 md:p-5 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-4 md:gap-6 min-w-0">
+                    <div class="flex flex-col items-start gap-2" title="Allow Editing">
+                        <MiscSwitch :turned-on="mentee.enable_edit_profile ?? true" @update="toggleEditProfile" />
+                        <span
+                            :class="`${mentee.enable_edit_profile ? 'bg-green-100 text-green-800 border-green-300' : 'bg-zinc-200 text-zinc-700 border-zinc-300'} text-[11px] font-semibold px-2 py-0.5 rounded-full border`">
+                            {{ mentee.enable_edit_profile ? 'Edit Enabled' : 'Edit Locked' }}
+                        </span>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-xl md:text-2xl font-semibold text-gray-900 truncate">{{ mentee.name }}</div>
+                        <div class="text-sm md:text-base text-gray-600 font-medium">#{{ mentee.register_number }}</div>
+                        <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                            <span class="px-2 py-1 rounded-full bg-nitMaroon-50 text-nitMaroon-700 border border-nitMaroon-200 font-semibold">
+                                {{ mentee.year }}
+                            </span>
+                            <span v-if="mentee.batch" class="px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-semibold">
+                                Batch {{ mentee.batch }}
+                            </span>
+                            <span v-if="mentee.section" class="px-2 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 font-semibold">
+                                Section {{ mentee.section }}
+                            </span>
+                        </div>
                     </div>
                 </div>
+
+                <div class="flex items-center gap-3">
+                    <a :href="`/dashboard/mentees/${mentee.register_number}/meetings`"
+                        class="hidden sm:flex items-center gap-2 bg-nitMaroon-700 hover:bg-nitMaroon-800 text-rose-50 rounded-lg py-2.5 px-4 transition-colors">
+                        <span class="text-sm font-medium">Check Meeting Details</span>
+                        <svg class="block w-5 h-5 stroke-2 stroke-rose-100"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                            <path class="transition-all duration-500 transform ease-in-out" stroke-linecap="round"
+                                stroke-linejoin="round" :d="`${AllIcons.userplus}`" />
+                        </svg>
+                    </a>
+                    <button @click="toggleDrop" class="p-2 rounded-lg hover:bg-nitMaroon-50 transition-colors">
+                        <svg class="h-8 w-8 stroke-nitMaroon-600 stroke-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 30 24" aria-hidden="true">
+                            <path class="transition-all duration-500 transform ease-in-out" stroke-linecap="round"
+                                stroke-linejoin="round" :d="editOpen
+                                    ? `M 18 15 L 12 9 L 6 15` : `M 6 9 L 12 15 L 18 9`" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <button @click="toggleDrop">
-                <svg class="h-8 w-8 stroke-nitMaroon-600 stroke-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 30 24" aria-hidden="true">
-                    <path class="transition-all duration-500 transform ease-in-out" stroke-linecap="round"
-                        stroke-linejoin="round" :d="editOpen
-                            ? `M 18 15 L 12 9 L 6 15` : `M 6 9 L 12 15 L 18 9`" />
-                </svg>
-            </button>
+
+            <div class="px-4 pb-4 sm:hidden">
+                <a :href="`/dashboard/mentees/${mentee.register_number}/meetings`"
+                    class="inline-flex items-center gap-2 bg-nitMaroon-700 hover:bg-nitMaroon-800 text-rose-50 rounded-lg py-2 px-3 transition-colors">
+                    <span class="text-sm font-medium">Check Meeting Details</span>
+                    <svg class="block w-5 h-5 stroke-2 stroke-rose-100"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <path class="transition-all duration-500 transform ease-in-out" stroke-linecap="round"
+                            stroke-linejoin="round" :d="`${AllIcons.userplus}`" />
+                    </svg>
+                </a>
+            </div>
         </div>
-        <div
-            :class="`${editOpen ? `max-h-[999rem]` : `max-h-[0rem]`} overflow-y-hidden transition-all duration-1000 ease-in-out bg-nitMaroon-100/50 flex flex-col space-y-4`">
+        <div class="mentee-edit-panel"
+            :class="`${editOpen ? `max-h-[999rem]` : `max-h-[0rem]`} overflow-y-hidden transition-all duration-1000 ease-in-out bg-white/75 border-x border-b border-nitMaroon-200 rounded-b-2xl flex flex-col space-y-4`">
             <div class="p-2">
+                <div class="sticky top-0 z-10 bg-white/90 backdrop-blur border border-nitMaroon-200 rounded-xl p-2 mb-4">
+                    <div class="flex flex-wrap gap-2">
+                        <button v-for="tab in sectionTabs" :key="tab.key" @click="activeTab = tab.key"
+                            :class="`px-3 py-1.5 text-xs font-semibold rounded-full transition-colors ${activeTab === tab.key ? 'bg-nitMaroon-700 text-white' : 'bg-white text-nitMaroon-700 border border-nitMaroon-200 hover:bg-nitMaroon-50'}`">
+                            {{ tab.label }}
+                        </button>
+                    </div>
+                </div>
+
+                <MiscMessage
+                    :class="`${toggleMessage.text ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full lg:w-96 mx-auto`"
+                    :type="toggleMessage.type">
+                    {{ toggleMessage.text }}
+                </MiscMessage>
+
                 <!-- BASIC STUDENT INFO -->
+                <div v-show="activeTab === 'basic'">
                 <h2 class="mt-4 text-2xl font-bold uppercase mx-auto text-center">Basic Info</h2>
                 <form class="flex flex-col items-center gap-4 mt-5 max-w-3xl mx-auto" @submit="e => updateBasic(e)">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full">
@@ -71,7 +115,10 @@
                     </button>
                 </form>
                 <hr class="mt-4 border-1 border-nitMaroon-600 max-w-6xl mx-auto" />
+                </div>
+
                 <!-- STUDENT PERSONAL INFO -->
+                <div v-show="activeTab === 'personal'">
                 <h2 class="mt-4 text-2xl font-bold uppercase mx-auto text-center">Personal Info</h2>
                 <form class="flex flex-col items-center gap-4 mt-5 max-w-3xl mx-auto" @submit="e => updatePersonal(e)">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full">
@@ -119,8 +166,10 @@
                     </button>
                 </form>
                 <hr class="mt-4 border-1 border-nitMaroon-600 max-w-6xl mx-auto" />
+                </div>
 
                 <!-- STUDENT FATHER INFO -->
+                <div v-show="activeTab === 'father'">
                 <h2 class="mt-4 text-2xl font-bold uppercase mx-auto text-center">Father Info</h2>
                 <form class="flex flex-col items-center gap-4 mt-5 max-w-3xl mx-auto" @submit="e => updateFather(e)">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full">
@@ -165,7 +214,10 @@
                     </button>
                 </form>
                 <hr class="mt-4 border-1 border-nitMaroon-600 max-w-6xl mx-auto" />
+                </div>
+
                 <!-- STUDENT MOTHER INFO -->
+                <div v-show="activeTab === 'mother'">
                 <h2 class="mt-4 text-2xl font-bold uppercase mx-auto text-center">Mother Info</h2>
                 <form class="flex flex-col items-center gap-4 mt-5 max-w-3xl mx-auto" @submit="e => updateMother(e)">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full">
@@ -210,6 +262,9 @@
                     </button>
                 </form>
                 <hr class="mt-4 border-1 border-nitMaroon-600 max-w-6xl mx-auto" /> <!-- SPECIAL ACHIEVEMENT INFO -->
+                </div>
+
+                <div v-show="activeTab === 'special'">
                 <h2 class="mt-4 text-2xl font-bold uppercase mx-auto text-center">Achievements / Special Info</h2>
                 <form class="flex flex-col items-center gap-4 pt-8" @submit="e => updateSpecial(e)">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -231,6 +286,9 @@
                     </button>
                 </form>
                 <hr class="mt-4 border-1 border-nitMaroon-600 max-w-6xl mx-auto" /> <!-- ACADEMIC INFO -->
+                </div>
+
+                <div v-show="activeTab === 'academic'">
                 <h2 class="mt-4 text-2xl font-bold uppercase mx-auto text-center">Academic Qualifications </h2>
                 <form class="flex flex-col items-center gap-4 pt-8" @submit="e => updateAcademic(e)">
                     <div class="font-bold text-xl uppercase">sslc(10th)</div>
@@ -313,6 +371,7 @@
                         Update Academic Info
                     </button>
                 </form>
+                </div>
             </div>
         </div>
     </div>
@@ -329,6 +388,17 @@ const personalMessage = ref({ type: "error", text: "" })
 const fatherMessage = ref({ type: "error", text: "" })
 const motherMessage = ref({ type: "error", text: "" })
 const academicMessage = ref({ type: "error", text: "" })
+const toggleMessage = ref({ type: "info", text: "" })
+const activeTab = ref("basic")
+
+const sectionTabs = [
+    { key: "basic", label: "Basic" },
+    { key: "personal", label: "Personal" },
+    { key: "father", label: "Father" },
+    { key: "mother", label: "Mother" },
+    { key: "special", label: "Special" },
+    { key: "academic", label: "Academic" },
+]
 
 const toggleDrop = () => editOpen.value = !editOpen.value
 const updateAcademic = async (e: Event) => {
@@ -429,17 +499,25 @@ const updateSpecial = async (e: Event) => {
 };
 
 const toggleEditProfile = async (val: boolean) => {
-    const auth = useCookie<string>("nitt_token");
-    if (!auth.value) return false;
-    await useFetch<{ token: string }>(`/api/mentees/update/${mentee.register_number}/editable`, {
-        method: "PATCH", body: JSON.stringify({ value: val }),
-        headers: { "Authorization": `Bearer ${auth.value}` },
-        onResponse({ request, response, options }) {
-        },
-        onResponseError({ request, response, options }) {
-            alert(`Unable to toggle editing. Error ${response.status} with ${response.statusText}`)
-        }
-    })
+    const previous = mentee.enable_edit_profile;
+    mentee.enable_edit_profile = val;
+
+    try {
+        await $fetch(`/api/mentees/update/${mentee.register_number}/editable`, {
+            method: "PATCH",
+            body: { value: val },
+        });
+        toggleMessage.value.type = "info";
+        toggleMessage.value.text = val ? "Edit access enabled." : "Edit access disabled.";
+    } catch (error: any) {
+        mentee.enable_edit_profile = previous;
+        toggleMessage.value.type = "error";
+        toggleMessage.value.text = error?.data?.statusText || error?.data?.statusMessage || "Unable to toggle editing.";
+    }
+
+    setTimeout(() => {
+        toggleMessage.value.text = "";
+    }, 2200);
 };
 
 const updateBasic = async (e: Event) => {
@@ -609,3 +687,33 @@ const updateMother = async (e: Event) => {
     })
 };
 </script>
+
+<style scoped>
+.mentee-edit-panel input,
+.mentee-edit-panel select,
+.mentee-edit-panel textarea {
+    background-color: #ffffff;
+    border: 2px solid #d6c0c7;
+    border-radius: 0.5rem;
+    color: #111827;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.08);
+}
+
+.mentee-edit-panel input:focus,
+.mentee-edit-panel select:focus,
+.mentee-edit-panel textarea:focus {
+    outline: none;
+    border-color: #8d2a40;
+    box-shadow: 0 0 0 3px rgba(141, 42, 64, 0.2);
+}
+
+.mentee-edit-panel input::placeholder,
+.mentee-edit-panel textarea::placeholder {
+    color: #6b7280;
+}
+
+.mentee-edit-panel label {
+    color: #374151;
+    font-weight: 600;
+}
+</style>

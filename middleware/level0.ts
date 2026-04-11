@@ -1,28 +1,44 @@
 export default defineNuxtRouteMiddleware(async (to, _from) => {
   try {
     const userStore = useUserStore();
-    
-    // Check if we already have user data in store to avoid refetching
-    if (!userStore.loggedIn || !userStore.id) {
-      const user = await useUser();
-      if (!user) {
-        return navigateTo(`/login?redirect=${to.fullPath}`);
+
+    const session = await useUserSession();
+    if (!session.ok) {
+      if (session.statusCode && session.statusCode >= 500) {
+        return abortNavigation(
+          createError({
+            statusCode: 503,
+            statusMessage: "Service temporarily unavailable. Please try again.",
+          })
+        );
       }
-      
-      userStore.loggedIn = true;
-      userStore.id = user.id;
-      userStore.username = user.username;
-      userStore.level = user.level;
-      
-      if (user.level === 0) {
-        const student = await useMe();
-        // @ts-ignore
-        userStore.student.is_pg = student.year === "PG";      
-        // @ts-ignore
-        userStore.student = student;
-        userStore.department = student ? student.department.name : "NONE"
-      }
+
+      userStore.signOut();
+      return navigateTo(`/login?redirect=${to.fullPath}`);
     }
+
+    const user = session.user;
+    if (user.level !== 0) {
+      if (user.level >= 1) return navigateTo("/dashboard");
+      userStore.signOut();
+      return navigateTo(`/login?redirect=${to.fullPath}`);
+    }
+
+    userStore.loggedIn = true;
+    userStore.id = user.id;
+    userStore.username = user.username;
+    userStore.level = user.level;
+
+    const student = await useMe();
+    if (!student) {
+      return navigateTo(`/login?redirect=${to.fullPath}`);
+    }
+
+    // @ts-ignore
+    userStore.student.is_pg = student.year === "PG";
+    // @ts-ignore
+    userStore.student = student;
+    userStore.department = student.department.name;
   } catch (e) {
     return navigateTo(`/login?redirect=${to.fullPath}`);
   }

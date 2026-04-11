@@ -1,6 +1,7 @@
 <template>
-    <div class="min-h-screen bg-nitMaroon-50 p-8">
-        <div class="max-w-4xl mx-auto">
+    <div class="min-h-screen bg-nitMaroon-50 p-8 relative">
+        <MiscGeometricBg />
+        <div class="max-w-4xl mx-auto relative z-10">
             <!-- Welcome Card -->
             <div class="bg-white rounded-lg border border-nitMaroon-200 p-8 animate-fade-in">
                 <div class="flex items-center gap-4">

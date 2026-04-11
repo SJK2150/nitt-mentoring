@@ -1,6 +1,7 @@
 <template>
-    <div class="min-h-screen bg-nitMaroon-50 p-8">
-        <div class="max-w-7xl mx-auto">
+    <div class="min-h-screen bg-nitMaroon-50 p-8 relative">
+        <MiscGeometricBg />
+        <div class="max-w-7xl mx-auto relative z-10">
             <!-- Header Section -->
             <div class="mb-8">
                 <h1 class="text-4xl font-bold text-gray-900 mb-2 tracking-tight">User Management</h1>
@@ -153,7 +154,7 @@
                                         {{ user.year }}
                                     </span>
                                 </div>
-                                <p class="text-xs text-gray-600 line-clamp-1">Roll: {{ user.register_no }}</p>
+                                <p class="text-xs text-gray-600 line-clamp-1">Roll: {{ user.register_number }}</p>
                             </div>
                             
                             <!-- Description/Info -->
@@ -180,7 +181,8 @@
                     <div :class="`${modelOpen ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-lg p-8 relative`">
                         <!-- Close Button -->
                         <button 
-                            @click="modelOpen = false"
+                            @click="closeModal"
+                            type="button"
                             class="absolute top-6 right-6 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200 group">
                             <svg class="w-5 h-5 text-gray-600 group-hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -213,10 +215,14 @@
                                     <input 
                                         type="password" 
                                         v-model="newPass"
+                                        required
+                                        minlength="8"
+                                        autofocus
                                         placeholder="Enter new password"
-                                        class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent transition-all duration-300 text-gray-900"
+                                        class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent focus:bg-white transition-all duration-300 text-gray-900"
                                     />
                                 </div>
+                                <p class="mt-1.5 text-xs text-gray-500">Must be at least 8 characters with uppercase, lowercase, and number</p>
                             </div>
                             
                             <div>
@@ -232,8 +238,10 @@
                                     <input 
                                         type="password" 
                                         v-model="confirmPass"
+                                        required
+                                        minlength="8"
                                         placeholder="Confirm new password"
-                                        class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent transition-all duration-300 text-gray-900"
+                                        class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:border-transparent focus:bg-white transition-all duration-300 text-gray-900"
                                     />
                                 </div>
                             </div>
@@ -259,7 +267,7 @@
                 
                 <!-- Modal Backdrop -->
                 <div
-                    @click="modelOpen = false"
+                    @click="closeModal"
                     :class="`${modelOpen ? `visible opacity-100` : `invisible opacity-0`} transition-opacity duration-300 fixed inset-0 bg-black/60 backdrop-blur-md z-40`">
                 </div>
             </div>
@@ -283,6 +291,14 @@ const userStore = useUserStore()
 const newPass = ref("")
 const confirmPass = ref("")
 
+// Close modal and reset form
+const closeModal = () => {
+    modelOpen.value = false;
+    newPass.value = "";
+    confirmPass.value = "";
+    message.value = { type: "error", text: "" };
+}
+
 // Material Design 3 Tab Color Helper
 const getActiveTabClass = (tab: string) => {
     switch(tab) {
@@ -298,16 +314,12 @@ const getActiveTabClass = (tab: string) => {
 }
 
 // Server-side data fetching - optimized with lazy loading
-const auth = useCookie<string>("nitt_token")
-
 const { data: facultyData, pending: facultyLoading } = await useFetch('/api/faculty/all', {
-    headers: { "Authorization": `Bearer ${auth.value}` },
     key: 'faculty-list',
     lazy: true
 })
 
 const { data: studentsData, pending: studentsLoading } = await useFetch('/api/mentees/all', {
-    headers: { "Authorization": `Bearer ${auth.value}` },
     key: 'students-list',
     lazy: true
 })
@@ -319,7 +331,6 @@ const ugStudents = computed(() => (studentsData.value || []).filter((s: any) => 
 const pgStudents = computed(() => (studentsData.value || []).filter((s: any) => s.year === 'PG'))
 
 const search = ref("")
-const expandFilter = ref(false)
 
 const displayedUsers = computed(() => {
     let users: any[] = []
@@ -332,63 +343,107 @@ const displayedUsers = computed(() => {
         users = pgStudents.value
     }
     
-    if (!expandFilter.value || !search.value) return users
+    // Filter by search if search value exists
+    if (!search.value) return users
     
     return users.filter(user => {
         const searchLower = search.value.toLowerCase()
         if (activeTab.value === 'Faculty') {
             return user.name?.toLowerCase().includes(searchLower) ||
+                   user.username?.toLowerCase().includes(searchLower) ||
                    String(user.id).includes(search.value)
         } else {
             return user.name?.toLowerCase().includes(searchLower) ||
-                   user.register_no?.toLowerCase().includes(searchLower)
+                   user.register_number?.toLowerCase().includes(searchLower) ||
+                   user.username?.toLowerCase().includes(searchLower)
         }
     })
 })
 
 const setUser = (username: string) => {
     currentUser.value = username;
+    newPass.value = "";
+    confirmPass.value = "";
+    message.value = { type: "error", text: "" };
     modelOpen.value = true;
 }
 
 const message = ref({ type: "error", text: "" })
 const handleSubmit = async (e: Event) => {
     e.preventDefault();
+    message.value = { type: "error", text: "" };
+    
     const password = newPass.value;
-    if (password !== confirmPass.value) {
-        message.value.type = "error"
-        message.value.text = "Passwords do not match"
+    
+    // Client-side validation
+    if (password.length < 8) {
+        message.value.type = "error";
+        message.value.text = "Password must be at least 8 characters long";
         return;
     }
-    const auth = useCookie<string>("nitt_token");
-    if (!auth.value) return false;
-    await useFetch(`/api/users/edit`, {
-        method: "PATCH", body: JSON.stringify({ username: currentUser.value, password }),
-        headers: { "Authorization": `Bearer ${auth.value}` },
-        onResponse({ request, response, options }) {
-            message.value.type = "info"
-            message.value.text = "Updated user."
-            newPass.value = "";
-            confirmPass.value = "";
-        },
-        onResponseError({ request, response, options }) {
-            message.value.type = "error"
-            switch (response.status) {
-                case 400:
-                    message.value.text = "Missing Fields."
-                case 401:
-                    message.value.text = "You are not supposed to be here."
-                    break;
-                case 404:
-                    message.value.text = "No such user exists."
-                    break;
-                default:
-                    message.value.text = "An unknown error occurred";
-                    break;
+    
+    if (!/[A-Z]/.test(password)) {
+        message.value.type = "error";
+        message.value.text = "Password must contain at least one uppercase letter";
+        return;
+    }
+    
+    if (!/[a-z]/.test(password)) {
+        message.value.type = "error";
+        message.value.text = "Password must contain at least one lowercase letter";
+        return;
+    }
+    
+    if (!/[0-9]/.test(password)) {
+        message.value.type = "error";
+        message.value.text = "Password must contain at least one number";
+        return;
+    }
+    
+    if (password !== confirmPass.value) {
+        message.value.type = "error";
+        message.value.text = "Passwords do not match";
+        return;
+    }
+    
+    try {
+        await useFetch(`/api/users/edit`, {
+            method: "PATCH", 
+            body: JSON.stringify({ username: currentUser.value, password }),
+            onResponse({ request, response, options }) {
+                message.value.type = "info";
+                message.value.text = "Password updated successfully!";
+                newPass.value = "";
+                confirmPass.value = "";
+                
+                // Close modal after 1.5 seconds
+                setTimeout(() => {
+                    modelOpen.value = false;
+                    message.value = { type: "error", text: "" };
+                }, 1500);
+            },
+            onResponseError({ request, response, options }) {
+                message.value.type = "error";
+                switch (response.status) {
+                    case 400:
+                        message.value.text = response._data?.statusMessage || "Invalid input. Check password requirements.";
+                        break;
+                    case 401:
+                        message.value.text = "You are not authorized to perform this action.";
+                        break;
+                    case 404:
+                        message.value.text = "User not found.";
+                        break;
+                    default:
+                        message.value.text = "An error occurred while updating the password.";
+                        break;
+                }
             }
-            abortNavigation()
-        }
-    })
+        });
+    } catch (error) {
+        message.value.type = "error";
+        message.value.text = "Network error. Please try again.";
+    }
 };
 </script>
 

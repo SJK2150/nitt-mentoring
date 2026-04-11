@@ -15,91 +15,103 @@ model users {
   password String
   mentor   faculty?
   mentee   students?
+  
+  @@index([level])
+  @@index([username])
 }
 
 model faculty {
-  id            Int        @id
+  id            Int         @id
   name          String
-  user_id       Int        @unique
+  user_id       Int         @unique
   department_id String
-  department    department @relation(fields: [department_id], references: [id])
-  user          users      @relation(fields: [user_id], references: [id])
+  department    department  @relation(fields: [department_id], references: [id])
+  user          users       @relation(fields: [user_id], references: [id])
   meetings      meetings[]
   mentees       students[]
+  
+  @@index([department_id])
+  @@index([user_id])
 }
 
 model students {
- id                          Int         @id @default(autoincrement())
- user_id                     Int         @unique
- register_no                 String      @unique
- name                        String
- year                        String
- section                     String?
- batch                       Int?
- department_id               String
-
- // UG-specific fields
- jee_rank                    Int?
- jee_score                   Int?
-
- // PG-specific fields
- ug_cgpa                     Float?
- gate_score                  Int?
- work_experience             String?
-
- // Personal Details
- editable_personal           Boolean     @default(false)
- gender                      String?
- period_of_study             String?
- blood_group                 String?
- mobile_number               String?
- whatsapp_number             String?
- date_of_birth               DateTime?
- email_id                    String?
-
- // Family Details
- f_name                      String?
- f_occupation                String?
- f_mobile_number             String?
- f_whatsapp_number           String?
- f_email_id                  String?
- f_address                   String?
- m_name                      String?
- m_occupation                String?
- m_mobile_number             String?
- m_whatsapp_number           String?
- m_email_id                  String?
- m_address                   String?
-
- // Academic History
- sslc_board                  String?
- sslc_institution            String?
- sslc_percentage             String?
- sslc_years                  String?
- hsc_board                   String?
- hsc_institution             String?
- hsc_percentage              String?
- hsc_years                   String?
-
- // Additional Details
- positions_of_responsibility String?
- scholarships                String?
- competitions                String?
- special_talents             String?
- role_model                  String?
- objectives                  String?
- extra_curricular            String?
- reassessment_info           String?
- placement_studies           String?
- student_comments            String?
-
- // Relationships
- mentor_id                   Int?
- department                  department  @relation(fields: [department_id], references: [id])
- mentor                      faculty?    @relation(fields: [mentor_id], references: [id])
- user                        users       @relation(fields: [user_id], references: [id])
- academics                   academics[]
- meetings                    meetings[]
+  id                          Int         @id @default(autoincrement())
+  user_id                     Int         @unique
+  register_no                 String      @unique
+  name                        String
+  year                        String
+  section                     String?
+  batch                       Int?
+  department_id               String
+  
+  // UG-specific fields
+  jee_rank                    Int?
+  jee_score                   Int?
+  
+  // PG-specific fields
+  ug_cgpa                     Float?
+  gate_score                  Int?
+  work_experience             String?
+  
+  // Personal Details
+  editable_personal           Boolean     @default(false)
+  gender                      String?
+  period_of_study             String?
+  blood_group                 String?
+  mobile_number               String?
+  whatsapp_number             String?
+  date_of_birth               DateTime?
+  email_id                    String?
+  
+  // Family Details
+  f_name                      String?
+  f_occupation                String?
+  f_mobile_number             String?
+  f_whatsapp_number           String?
+  f_email_id                  String?
+  f_address                   String?
+  m_name                      String?
+  m_occupation                String?
+  m_mobile_number             String?
+  m_whatsapp_number           String?
+  m_email_id                  String?
+  m_address                   String?
+  
+  // Academic History
+  sslc_board                  String?
+  sslc_institution            String?
+  sslc_percentage             String?
+  sslc_years                  String?
+  hsc_board                   String?
+  hsc_institution             String?
+  hsc_percentage              String?
+  hsc_years                   String?
+  
+  // Additional Details
+  positions_of_responsibility String?
+  scholarships                String?
+  competitions                String?
+  special_talents             String?
+  role_model                  String?
+  objectives                  String?
+  extra_curricular            String?
+  reassessment_info           String?
+  placement_studies           String?
+  student_comments            String?
+  
+  // Relationships
+  mentor_id                   Int?
+  department                  department  @relation(fields: [department_id], references: [id])
+  mentor                      faculty?    @relation(fields: [mentor_id], references: [id])
+  user                        users       @relation(fields: [user_id], references: [id])
+  academics                   academics[]
+  meetings                    meetings[]
+  
+  @@index([department_id])
+  @@index([mentor_id])
+  @@index([year])
+  @@index([batch, section])
+  @@index([register_no])
 }
 
 model academics {
@@ -153,6 +165,9 @@ model academics {
   es_subject_9_name    String?
   es_subject_9_grade   String?
   student              students @relation(fields: [register_no], references: [register_no])
+  
+  @@index([register_no])
+  @@index([year])
 }
 
 model meetings {
@@ -164,6 +179,10 @@ model meetings {
   meeting_number Int
   mentee         students @relation(fields: [mentee_id], references: [register_no])
   mentor         faculty  @relation(fields: [mentor_id], references: [id])
+  
+  @@index([mentee_id])
+  @@index([mentor_id])
+  @@index([date])
 }
 
 model department {

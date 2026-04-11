@@ -32,6 +32,7 @@
                     </label>
                     <input name="password" id="password_field" type="password" placeholder="Create a secure password" required
                         class="px-4 py-3 rounded border border-gray-300 bg-yellow-50 focus:bg-yellow-50 focus:border-gray-400 focus:outline-none transition-colors" />
+                    <p class="text-xs text-gray-500 mt-1">Minimum 8 characters, with uppercase, lowercase, and number</p>
                 </div>
                 
                 <div class="flex flex-col gap-2">
@@ -102,31 +103,19 @@ const handleSubmit = async (e: Event) => {
         department: formData.get("department"),
         faculty_id: formData.get("faculty_id")
     };
-    const auth = useCookie<string>("nitt_token");
-    if (!auth.value) return false;
+    
+    // The httpOnly cookie (nitt_token) is automatically sent by the browser
     await useFetch<{ token: string }>(`/api/faculty/new`, {
-        method: "POST", body: JSON.stringify(creds),
-        headers: { "Authorization": `Bearer ${auth.value}` },
+        method: "POST", 
+        body: JSON.stringify(creds),
         onResponse({ request, response, options }) {
             message.value.type = "info"
             message.value.text = "Created user."
         },
         onResponseError({ request, response, options }) {
             message.value.type = "error"
-            switch (response.status) {
-                case 400:
-                    // this won't happen
-                    message.value.text = "Missing Fields."
-                case 401:
-                    message.value.text = "Can't grant the access"
-                    break;
-                default:
-                    message.value.text = "An unknown error occurred";
-                    break;
-            }
-            abortNavigation()
-
+            message.value.text = response._data?.statusMessage || response._data?.message || "Failed to create faculty account. Please check your inputs."
         }
     })
-};
+}
 </script>

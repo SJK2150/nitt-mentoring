@@ -1,10 +1,48 @@
 <template>
-    <div class="min-h-screen bg-nitMaroon-50 p-6">
-        <div class="max-w-7xl mx-auto">
+    <div class="min-h-screen bg-nitMaroon-50 p-6 relative">
+        <MiscGeometricBg />
+        <div class="max-w-7xl mx-auto relative z-10">
             <!-- Header -->
             <div class="mb-6">
                 <h1 class="text-3xl font-bold text-gray-900">All Students</h1>
                 <p class="text-gray-600 mt-1">Manage student records and assignments</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white rounded-lg border border-nitMaroon-200 p-1 mb-6 inline-flex gap-1">
+                <button
+                    @click="activeTab = 'all'"
+                    :class="[
+                        'px-4 py-2 rounded text-sm font-medium transition-all duration-200 border-2 border-dashed',
+                        activeTab === 'all' 
+                            ? 'bg-nitMaroon-600 text-white shadow-sm border-nitMaroon-400' 
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-gray-300'
+                    ]">
+                    All Students
+                    <span class="ml-1.5 text-xs opacity-75">({{ mentees.length }})</span>
+                </button>
+                <button
+                    @click="activeTab = 'UG'"
+                    :class="[
+                        'px-4 py-2 rounded text-sm font-medium transition-all duration-200 border-2 border-dashed',
+                        activeTab === 'UG' 
+                            ? 'bg-nitMaroon-600 text-white shadow-sm border-nitMaroon-400' 
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-gray-300'
+                    ]">
+                    UG Students
+                    <span class="ml-1.5 text-xs opacity-75">({{ ugCount }})</span>
+                </button>
+                <button
+                    @click="activeTab = 'PG'"
+                    :class="[
+                        'px-4 py-2 rounded text-sm font-medium transition-all duration-200 border-2 border-dashed',
+                        activeTab === 'PG' 
+                            ? 'bg-nitMaroon-600 text-white shadow-sm border-nitMaroon-400' 
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-gray-300'
+                    ]">
+                    PG Students
+                    <span class="ml-1.5 text-xs opacity-75">({{ pgCount }})</span>
+                </button>
             </div>
 
             <!-- Search and Filter -->
@@ -30,17 +68,27 @@
             </div>
 
             <!-- Loading State -->
-            <div v-if="!mentees.length" class="bg-white rounded-lg border border-nitMaroon-200 p-12 text-center">
+            <div v-if="loading" class="bg-white rounded-lg border border-nitMaroon-200 p-12 text-center">
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-nitMaroon-50 mb-4">
                     <div class="w-8 h-8 border-3 border-gray-300 border-t-nitMaroon-600 rounded-full animate-spin"></div>
                 </div>
                 <p class="text-gray-600 font-medium">Loading students...</p>
             </div>
 
+            <!-- Error State -->
+            <div v-else-if="error" class="bg-white rounded-lg border border-red-200 p-12 text-center">
+                <p class="text-red-600 font-medium">Unable to load students. Please refresh and try again.</p>
+            </div>
+
             <!-- Students Grid -->
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div v-else-if="mentees.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div v-for="(student, index) in filteredMentees" :key="student.register_number"
-                    class="group relative bg-white rounded-lg overflow-hidden border border-nitMaroon-200 hover:border-nitMaroon-300 transition-all duration-300">
+                    @click="openStudentEdit(student.register_number)"
+                    @keydown.enter="openStudentEdit(student.register_number)"
+                    @keydown.space.prevent="openStudentEdit(student.register_number)"
+                    tabindex="0"
+                    role="button"
+                    class="group relative bg-white rounded-lg overflow-hidden border border-nitMaroon-200 hover:border-nitMaroon-300 transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-nitMaroon-500 focus:ring-offset-2">
                     
                     <!-- Header Section (Colored Banner) -->
                     <div class="h-16 bg-gradient-to-r from-nitMaroon-600 to-nitMaroon-700 relative"></div>
@@ -82,18 +130,10 @@
                         </div>
                         
                         <!-- Actions -->
-                        <div class="flex gap-2">
+                        <div class="flex justify-end">
                             <button
-                                @click="editStudent(student)"
-                                class="flex-1 py-1.5 px-3 bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white rounded text-xs font-medium transition-colors duration-300 flex items-center justify-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Edit
-                            </button>
-                            <button
-                                @click="deleteStudent(student)"
-                                class="py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium transition-colors duration-300">
+                                @click.stop="deleteStudent(student)"
+                                class="w-10 h-8 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium transition-colors duration-300 flex items-center justify-center">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
@@ -104,11 +144,11 @@
             </div>
 
             <!-- Empty State -->
-            <div v-if="mentees.length && !filteredMentees.length" class="bg-white rounded-lg border border-nitMaroon-200 p-12 text-center">
+            <div v-else-if="!filteredMentees.length" class="bg-white rounded-lg border border-nitMaroon-200 p-12 text-center">
                 <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <p class="text-gray-600 font-medium">No students found matching "{{ search }}"</p>
+                <p class="text-gray-600 font-medium">{{ search ? `No students found matching "${search}"` : 'No students available.' }}</p>
             </div>
         </div>
     </div>
@@ -119,18 +159,18 @@ import type { PartialStudent } from '@/types/types';
 
 definePageMeta({
     title: "All Students",
-    middleware: ["level1"]
+    middleware: ["level2"]
 })
 
-const auth = useCookie<string>("nitt_token")
 const search = ref("")
+const activeTab = ref<'all' | 'UG' | 'PG'>('all')
 
 // Server-side data fetching
-const { data: studentsData } = await useFetch('/api/mentees/all', {
-    headers: { "Authorization": `Bearer ${auth.value}` },
-    key: 'hod-students-list',
-    lazy: true
+const { data: studentsData, pending, error } = await useFetch('/api/mentees/all', {
+    key: 'hod-students-list'
 })
+
+const loading = computed(() => pending.value)
 
 const mentees = computed(() => {
     if (!studentsData.value) return []
@@ -147,20 +187,35 @@ const mentees = computed(() => {
     }))
 })
 
-// Filtered students based on search
+// Count students by type
+const ugCount = computed(() => mentees.value.filter(s => s.year === 'UG').length)
+const pgCount = computed(() => mentees.value.filter(s => s.year === 'PG').length)
+
+// Filtered students based on tab and search
 const filteredMentees = computed(() => {
-    if (!search.value) return mentees.value
+    let filtered = mentees.value
     
-    const searchLower = search.value.toLowerCase()
-    return mentees.value.filter(student => 
-        student.name.toLowerCase().includes(searchLower) ||
-        student.register_number.toLowerCase().includes(searchLower)
-    )
+    // Filter by tab
+    if (activeTab.value === 'UG') {
+        filtered = filtered.filter(s => s.year === 'UG')
+    } else if (activeTab.value === 'PG') {
+        filtered = filtered.filter(s => s.year === 'PG')
+    }
+    
+    // Filter by search
+    if (search.value) {
+        const searchLower = search.value.toLowerCase()
+        filtered = filtered.filter(student => 
+            student.name.toLowerCase().includes(searchLower) ||
+            student.register_number.toLowerCase().includes(searchLower)
+        )
+    }
+    
+    return filtered
 })
 
-// Edit student
-async function editStudent(student: PartialStudent) {
-    await navigateTo(`/hod/students/${student.register_number}/edit`)
+const openStudentEdit = async (regno: string) => {
+    await navigateTo(`/hod/students/${regno}/edit`)
 }
 
 // Delete student
@@ -170,11 +225,8 @@ async function deleteStudent(student: PartialStudent) {
     }
 
     try {
-        const { error } = await useFetch(`/api/users/delete/${student.register_number}`, {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${auth.value}`,
-            }
+        const { error } = await useFetch(`/api/mentees/delete/${student.register_number}`, {
+            method: "DELETE"
         })
 
         if (error.value) {

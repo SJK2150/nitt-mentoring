@@ -1,6 +1,7 @@
 <template>
-    <div v-if="mentee" class="min-h-screen bg-nitMaroon-50 p-8">
-        <div class="max-w-7xl mx-auto">
+    <div v-if="mentee" class="min-h-screen bg-nitMaroon-50 p-8 relative">
+        <MiscGeometricBg />
+        <div class="max-w-7xl mx-auto relative z-10">
             <InfoMentee v-if="mentee" :mentee="mentee" />
             
             <!-- Action Buttons -->

@@ -1,130 +1,118 @@
 import { hash } from "bcrypt";
 import { Client } from "../../utils/database.js";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
+import { createStudentSchema } from "../../utils/validation.js";
+import { getTokenFromEvent } from "../../utils/auth";
 
 const client = new Client();
 
 export default defineEventHandler(async (e) => {
-  const auth = getHeader(e, "Authorization");
-  if (!auth || !auth.startsWith("Bearer ")) {
+  const token = getTokenFromEvent(e);
+  if (!token) {
     throw createError({
       statusCode: 401,
-      statusText: "Not logged in.",
+      statusMessage: "Not logged in",
     });
   }
 
-  const token = auth.slice(7);
   const jwtPayload = await verifyJwt(token);
   
   if (!jwtPayload || (Date.now() / 1000) > jwtPayload.exp) {
     throw createError({
       statusCode: 401,
-      statusText: "Session expired. Please login again.",
+      statusMessage: "Session expired. Please login again.",
     });
   }
 
   if (Number(jwtPayload.level) < 2) {
     throw createError({
-      statusCode: 401,
-      statusText: "You do not have permission.",
+      statusCode: 403,
+      statusMessage: "You do not have permission",
     });
   }
-
-  const body = await readBody<{
-    regno: string;
-    name: string;
-    year: string;
-    section?: string;
-    batch?: number;
-    department: string;
-    password: string;
-    ugCGPA?: number;
-    gateScore?: number;
-    workExperience?: string;
-  }>(e);
-
-  
-
-  // Core required fields validation
-  const requiredFields = ['regno', 'name', 'year', 'department', 'password'];
-  const missingRequiredFields = requiredFields.filter(field => !body[field as keyof typeof body]);
-
-  if (missingRequiredFields.length > 0) {
-    console.log(`Missing required fields: ${missingRequiredFields.join(', ')}`);
-    throw createError({
-      statusCode: 400,
-      statusText: `Missing required fields: ${missingRequiredFields.join(', ')}`
-    });
-  }
-
-  // Additional validation based on student type
-  if (body.year === 'UG') {
-    const ugRequiredFields = ['section', 'batch'];
-    const missingUgFields = ugRequiredFields.filter(field => !body[field as keyof typeof body]);
-    
-    if (missingUgFields.length > 0) {
-      console.log(`Missing UG student fields: ${missingUgFields.join(', ')}`);
-      throw createError({
-        statusCode: 400,
-        statusText: `UG students must provide: ${missingUgFields.join(', ')}`
-      });
-    }
-  }
-
-  // PG students don't need section, batch, ugCGPA, or gateScore - they're all optional
-
-  const encryptedPass = await hash(body.password, 10);
 
   try {
+    const body = await readBody(e);
+    
+    // Validate input with Zod
+    const result = createStudentSchema.safeParse(body);
+    if (!result.success) {
+      const validationMessage = result.error.issues[0]?.message || "Invalid input";
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid input",
+        message: validationMessage,
+      });
+    }
+
+    const validatedData = result.data;
+
+    // Additional validation based on student type
+    if (validatedData.year === 'UG') {
+      if (!validatedData.batch || !validatedData.section) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: "UG students must provide batch and section",
+        });
+      }
+    }
+
+    // Use BCRYPT_SALT from environment
+    const saltRounds = Number(process.env.BCRYPT_SALT) || 12;
+    const encryptedPass = await hash(validatedData.password, saltRounds);
+
     let userCreated: any;
     let studentCreated: any;
     
     await client.prisma.$transaction(async (prisma) => {
+      // Create user with explicitly whitelisted fields (prevent mass assignment)
       userCreated = await prisma.users.create({
         data: { 
-          username: body.regno, 
+          username: validatedData.regno, 
           password: encryptedPass, 
-          level: 0 
+          level: 0  // Always 0 for students
         },
       });
 
+      // Create student with explicitly whitelisted fields
+      const studentData: any = {
+        register_no: validatedData.regno,
+        user_id: userCreated.id,
+        name: validatedData.name,
+        year: validatedData.year,
+        department_id: validatedData.department,
+      };
+
+      // Add UG-specific fields
+      if (validatedData.year === 'UG') {
+        studentData.section = validatedData.section;
+        studentData.batch = validatedData.batch;
+      }
+
       studentCreated = await prisma.students.create({
-        data: {
-          register_no: body.regno,
-          user_id: userCreated.id,
-          name: body.name,
-          year: body.year,
-          section: body.year === 'UG' ? body.section : null,
-          batch: body.year === 'UG' ? body.batch : null,
-          department_id: body.department,
-          ug_cgpa: body.year === 'PG' ? (body.ugCGPA || 0) : 0,
-          gate_score: body.year === 'PG' ? (body.gateScore || 0) : 0,
-          work_experience: body.year === 'PG' ? (body.workExperience || '') : ''
-        },
+        data: studentData,
       });
     });
 
-    if (userCreated && studentCreated) {
-      return { message: "Account created successfully!", id: userCreated.id };
-    } else {
-      throw new Error("Failed to create user or student");
+    return { message: "Account created successfully!", id: userCreated.id };
+  } catch (err: any) {
+    if (err.statusCode) {
+      throw err;
     }
-  } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === "PrismaClientKnownRequestError") {
-        const prismaError = err as PrismaClientKnownRequestError;
-        if (prismaError.code === "P2002") {
-          throw createError({
-            statusCode: 400,
-            statusText: err.message
-          });
-        }
+
+    if (err instanceof PrismaClientKnownRequestError) {
+      if (err.code === "P2002") {
+        throw createError({
+          statusCode: 400,
+          statusMessage: "Student with this registration number already exists",
+        });
       }
     }
     
+    console.error('Student creation error:', err);
     throw createError({
-      statusCode: 400,
-      statusText: "Error creating account"
+      statusCode: 500,
+      statusMessage: "Error creating account",
     });
   }
 });

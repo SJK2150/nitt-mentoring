@@ -1,26 +1,33 @@
 export default defineNuxtRouteMiddleware(async (to, _from) => {
   try {
     const userStore = useUserStore();
-    
-    // Check if we already have user data in store to avoid refetching
-    if (!userStore.loggedIn || !userStore.id) {
-      const user = await useUser();
-      if (!user || user.level < 1) {
-        if (user && user.level === 0) return navigateTo("/student/me");
-        return navigateTo(`/login?redirect=${to.fullPath}`);
+
+    // Always validate server session to avoid stale Pinia state when cookie expires/disappears.
+    const session = await useUserSession();
+    if (!session.ok) {
+      if (session.statusCode && session.statusCode >= 500) {
+        return abortNavigation(
+          createError({
+            statusCode: 503,
+            statusMessage: "Service temporarily unavailable. Please try again.",
+          })
+        );
       }
-      
-      userStore.loggedIn = true;
-      userStore.username = user.username;
-      userStore.id = user.id;
-      userStore.level = user.level;
-    } else {
-      // User data exists, just verify level
-      if (userStore.level < 1) {
-        if (userStore.level === 0) return navigateTo("/student/me");
-        return navigateTo(`/login?redirect=${to.fullPath}`);
-      }
+
+      userStore.signOut();
+      return navigateTo(`/login?redirect=${to.fullPath}`);
     }
+
+    const user = session.user;
+    if (user.level < 1) {
+      if (user.level === 0) return navigateTo("/student/me");
+      return navigateTo(`/login?redirect=${to.fullPath}`);
+    }
+
+    userStore.loggedIn = true;
+    userStore.username = user.username;
+    userStore.id = user.id;
+    userStore.level = user.level;
   } catch (e) {
     return navigateTo(`/login?redirect=${to.fullPath}`);
   }

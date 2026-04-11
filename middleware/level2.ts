@@ -1,22 +1,38 @@
 export default defineNuxtRouteMiddleware(async (to, _from) => {
   try {
     const userStore = useUserStore();
-    
-    // Check if we already have user data in store to avoid refetching
-    if (!userStore.loggedIn || !userStore.id) {
-      const user = await useUser();
-      if (!user || user.level < 2) {
-        return navigateTo(`/login?redirect=${to.fullPath}`);
+
+    const session = await useUserSession();
+    if (!session.ok) {
+      if (session.statusCode && session.statusCode >= 500) {
+        return abortNavigation(
+          createError({
+            statusCode: 503,
+            statusMessage: "Service temporarily unavailable. Please try again.",
+          })
+        );
       }
-      
-      userStore.loggedIn = true;
-      userStore.username = user.username;
-      userStore.id = user.id;
-      userStore.level = user.level;
-    } else {
-      // User data exists, just verify level
-      if (userStore.level < 2) {
-        return navigateTo(`/login?redirect=${to.fullPath}`);
+
+      userStore.signOut();
+      return navigateTo(`/login?redirect=${to.fullPath}`);
+    }
+
+    const user = session.user;
+    if (user.level < 2) {
+      return navigateTo(`/login?redirect=${to.fullPath}`);
+    }
+
+    userStore.loggedIn = true;
+    userStore.username = user.username;
+    userStore.id = user.id;
+    userStore.level = user.level;
+
+    // Level 2 users should always have a faculty profile with department.
+    // Level 3 users may not, so keep existing department value for them.
+    if (user.level === 2) {
+      const faculty = await useFaculty();
+      if (faculty && faculty.department?.name) {
+        userStore.department = faculty.department.name;
       }
     }
   } catch (e) {

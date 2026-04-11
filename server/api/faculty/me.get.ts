@@ -2,15 +2,21 @@ import { Client } from "../../utils/database.js";
 
 const client = new Client();
 export default defineEventHandler(async (e) => {
-  const auth = getHeader(e, "Authorization");
-  if (!auth || !auth.startsWith("Bearer ")) {
-    // Not a valid auth token
+  // Check both Authorization header and httpOnly cookie
+  let token: string | undefined;
+  const authHeader = getHeader(e, "Authorization");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.slice(7);
+  } else {
+    token = getCookie(e, "nitt_token");
+  }
+
+  if (!token) {
     throw createError({
       statusCode: 401,
       statusText: "Not logged in.",
     });
   } else {
-    const token = auth.slice(7);
     const jwtPayload = await verifyJwt(token);
     if (!jwtPayload || (Date.now() / 1000) > jwtPayload.exp) {
       throw createError({

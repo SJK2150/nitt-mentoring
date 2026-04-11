@@ -1,5 +1,6 @@
 import { Client } from "../../../utils/database.js";
 import { verifyJwt } from "../../../utils/jwt.js";
+import { getTokenFromEvent } from "../../../utils/auth.js";
 
 const client = new Client();
 
@@ -7,14 +8,21 @@ export default defineEventHandler(async (e) => {
   const regnoStr = getRouterParam(e, "regno");
   const regno = regnoStr;
 
-  const auth = getHeader(e, "Authorization");
-  if (!auth || !auth.startsWith("Bearer ")) {
+  if (!regno || typeof regno !== "string") {
+    throw createError({
+      statusCode: 400,
+      statusText: "Invalid register number.",
+    });
+  }
+
+  const token = getTokenFromEvent(e);
+  if (!token) {
     throw createError({
       statusCode: 401,
       statusText: "Not logged in.",
     });
   }
-  const token = auth.slice(7);
+
   const jwtPayload = await verifyJwt(token);
   if (!jwtPayload || Date.now() / 1000 > jwtPayload.exp) {
     throw createError({
@@ -23,11 +31,18 @@ export default defineEventHandler(async (e) => {
     });
   }
 
+  if (Number(jwtPayload.level) < 2) {
+    throw createError({
+      statusCode: 403,
+      statusText: "You do not have permission.",
+    });
+  }
+
   try {
     // First get the student to find the user_id
     const student = await client.prisma.students.findUnique({
       where: { register_no: regno },
-      select: { user_id: true }
+      select: { user_id: true, register_no: true }
     });
 
     if (!student) {
@@ -39,6 +54,15 @@ export default defineEventHandler(async (e) => {
 
     // Delete both student and user records in a transaction
     await client.prisma.$transaction(async (prisma) => {
+      // Delete dependent rows first to satisfy FK constraints.
+      await prisma.meetings.deleteMany({
+        where: { mentee_id: student.register_no },
+      });
+
+      await prisma.academics.deleteMany({
+        where: { register_no: student.register_no },
+      });
+
       // Delete student record
       await prisma.students.delete({
         where: { register_no: regno },
@@ -49,14 +73,18 @@ export default defineEventHandler(async (e) => {
         where: { id: student.user_id },
       });
     });
-  } catch (error) {
+
+    return {
+      message: "Student deleted successfully.",
+    };
+  } catch (error: any) {
+    if (error?.statusCode) {
+      throw error;
+    }
+
     throw createError({
       statusCode: 500,
       statusText: "Failed to delete student.",
     });
   }
-
-  return {
-    message: "Student deleted successfully.",
-  };
 });
