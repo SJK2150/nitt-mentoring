@@ -19,10 +19,7 @@ export default defineEventHandler(async (e) => {
       });
     }
     const regno = getRouterParam(e, "regno");
-    console.log("lekjfeljkjflekjhglekjbbgrlkjgekljrhrelkjghr");
-    
-    console.log(jwtPayload.id);
-    
+
     const currentUser = await client.prisma.students.findFirst({
       where: { register_no: regno },
     });

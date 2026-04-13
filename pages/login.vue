@@ -49,14 +49,6 @@
                         {{ message.text }}
                     </MiscMessage>
 
-                    <div class="flex items-center justify-end">
-                        <router-link 
-                            to="/forgot-password" 
-                            class="text-sm text-nitMaroon-600 hover:text-nitMaroon-700 font-medium">
-                            Forgot password?
-                        </router-link>
-                    </div>
-
                     <button 
                         type="submit"
                         class="bg-nitMaroon-600 hover:bg-nitMaroon-700 text-white py-3 px-4 rounded font-medium transition-colors duration-200 shadow-sm">

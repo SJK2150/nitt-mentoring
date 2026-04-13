@@ -47,7 +47,6 @@ export default defineEventHandler(async (e) => {
       message: "PG information updated successfully.",
     };
   } catch (error) {
-    console.error("Error updating PG info:", error);
     throw createError({
       statusCode: 500,
       statusText: "Failed to update PG information.",

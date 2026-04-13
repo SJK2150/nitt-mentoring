@@ -109,7 +109,6 @@ export default defineEventHandler(async (e) => {
       }
     }
     
-    console.error('Student creation error:', err);
     throw createError({
       statusCode: 500,
       statusMessage: "Error creating account",

@@ -17,7 +17,6 @@ const adminResetSchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  console.log('🔐 [ADMIN PASSWORD RESET] Request received');
   
   try {
     // Get JWT token from Authorization header or cookie
@@ -49,7 +48,6 @@ export default defineEventHandler(async (event) => {
 
     // Check if requesting user is admin (level 3)
     if (jwtPayload.level !== 3) {
-      console.log(`❌ [ADMIN PASSWORD RESET] User level ${jwtPayload.level} attempted admin action`);
       throw createError({
         statusCode: 403,
         statusMessage: "Admin access required",
@@ -81,7 +79,6 @@ export default defineEventHandler(async (event) => {
 
     const { username, newPassword } = result.data;
     
-    console.log(`🔍 [ADMIN PASSWORD RESET] Admin ${adminUser.username} resetting password for: ${username}`);
 
     // Find target user
     const targetUser = await client.prisma.users.findUnique({
@@ -89,7 +86,6 @@ export default defineEventHandler(async (event) => {
     });
 
     if (!targetUser) {
-      console.log(`❌ [ADMIN PASSWORD RESET] User ${username} not found`);
       throw createError({
         statusCode: 404,
         statusMessage: "User not found",
@@ -117,14 +113,12 @@ export default defineEventHandler(async (event) => {
       userAgent: auditContext.userAgent,
     });
 
-    console.log(`✅ [ADMIN PASSWORD RESET] Password reset successful for: ${username}`);
 
     return {
       success: true,
       message: `Password reset successfully for user: ${username}`,
     };
   } catch (error: any) {
-    console.error('🔴 [ADMIN PASSWORD RESET] Error:', error);
     
     if (error.statusCode) {
       throw error;

@@ -44,7 +44,6 @@ export default defineEventHandler(async (e) => {
     // Validate input with Zod
     const result = createFacultySchema.safeParse(body);
     if (!result.success) {
-      console.log('❌ Validation error:', result.error.issues);
       throw createError({
         statusCode: 400,
         statusMessage: result.error.issues[0]?.message || "Invalid input",
@@ -53,7 +52,6 @@ export default defineEventHandler(async (e) => {
     
     let { faculty_id, username, password, level, name, department } = result.data;
     
-    console.log('📝 Creating faculty account:', { faculty_id, username, name, department, level });
     
     // Only level 3 (admin) can create HOD or admin accounts
     if (Number(jwtPayload.level) < 3 && level && level !== 1) {
@@ -76,7 +74,6 @@ export default defineEventHandler(async (e) => {
         },
       });
       
-      console.log('✅ User created:', userCreated.id);
       
       facultyCreated = await prisma.faculty.create({
         data: {
@@ -87,12 +84,10 @@ export default defineEventHandler(async (e) => {
         },
       });
       
-      console.log('✅ Faculty record created:', facultyCreated.id);
     });
     
     return { message: "Faculty account created successfully!", id: userCreated.id };
   } catch (err: any) {
-    console.error("❌ Error creating faculty:", err);
     
     if (err.statusCode) {
       throw err;

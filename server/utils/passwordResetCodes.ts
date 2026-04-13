@@ -14,6 +14,9 @@ interface ResetCode {
   attempts: number;
 }
 
+const resetCodeTtlMs = (process.env.NODE_ENV === 'production' ? 5 : 3) * 60 * 1000;
+const maxResetAttempts = process.env.NODE_ENV === 'production' ? 7 : 10;
+
 // In-memory storage (will be cleared on server restart)
 const resetCodes = new Map<string, ResetCode>();
 
@@ -37,13 +40,13 @@ export function generateResetCode(): string {
 }
 
 /**
- * Store a reset code for a user (10 minute expiry)
+ * Store a reset code for a user
  */
 export function storeResetCode(username: string, code: string): void {
   resetCodes.set(username, {
     username,
     code,
-    expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+    expiresAt: Date.now() + resetCodeTtlMs,
     attempts: 0,
   });
 }
@@ -51,7 +54,7 @@ export function storeResetCode(username: string, code: string): void {
 /**
  * Verify a reset code
  * Returns true if valid, false otherwise
- * Automatically increments attempt counter and removes after 5 failed attempts
+ * Automatically increments attempt counter and removes after too many failed attempts
  */
 export function verifyResetCode(username: string, code: string): boolean {
   const data = resetCodes.get(username);
@@ -65,7 +68,7 @@ export function verifyResetCode(username: string, code: string): boolean {
     return false; // Expired
   }
   
-  if (data.attempts >= 5) {
+  if (data.attempts >= maxResetAttempts) {
     resetCodes.delete(username);
     return false; // Too many attempts
   }
@@ -94,7 +97,7 @@ export function hasResetCode(username: string): boolean {
 export function getRemainingAttempts(username: string): number {
   const data = resetCodes.get(username);
   if (!data || data.expiresAt < Date.now()) {
-    return 5;
+    return maxResetAttempts;
   }
-  return Math.max(0, 5 - data.attempts);
+  return Math.max(0, maxResetAttempts - data.attempts);
 }

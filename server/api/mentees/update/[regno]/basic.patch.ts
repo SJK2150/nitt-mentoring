@@ -51,7 +51,6 @@ export default defineEventHandler(async (e) => {
       message: "Basic information updated successfully.",
     };
   } catch (error) {
-    console.error("Error updating basic info:", error);
     throw createError({
       statusCode: 500,
       statusText: "Failed to update basic information.",

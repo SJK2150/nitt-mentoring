@@ -52,7 +52,6 @@ export default defineEventHandler(async (e) => {
     
     return { message: "Successfully logged out." };
   } catch (error) {
-    console.error('Logout error:', error);
     // Still clear cookie even if audit logging fails
     deleteCookie(e, "nitt_token", { path: '/' });
     return { message: "Successfully logged out." };

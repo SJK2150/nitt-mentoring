@@ -105,7 +105,6 @@ export default defineEventHandler(async (e) => {
       throw error;
     }
     
-    console.error('Password change error:', error);
     throw createError({
       statusCode: 500,
       statusMessage: "Internal server error",

@@ -71,7 +71,6 @@ export default defineEventHandler(async (e) => {
       });
     }
     
-    console.error("Error creating user:", err);
     throw createError({
       statusCode: 500,
       statusMessage: "Internal server error",

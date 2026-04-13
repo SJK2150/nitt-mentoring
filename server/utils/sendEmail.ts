@@ -113,7 +113,6 @@ export async function sendEmail(to: string, subject: string, body: string, isHtm
       throw new Error(`SendGrid API failed: ${response.status} ${errorText}`);
     }
 
-    console.log("Email sent via SendGrid HTTPS API to:", to);
   };
 
   try {
@@ -123,13 +122,10 @@ export async function sendEmail(to: string, subject: string, body: string, isHtm
       subject,
       ...(isHtml ? { html: body } : { text: body }),
     });
-    console.log("Email sent successfully to:", to);
   } catch (error) {
-    console.error("SMTP send failed, trying HTTPS fallback:", error);
     try {
       await sendWithSendGridApi();
     } catch (fallbackError) {
-      console.error("HTTPS email fallback failed:", fallbackError);
       throw new Error("Failed to send email");
     }
   }

@@ -1,28 +1,30 @@
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 // Rate limiter for login endpoint - stricter
 const loginLimiter = new RateLimiterMemory({
-  points: 5, // 5 attempts
+  points: isProduction ? 8 : 20,
   duration: 15 * 60, // per 15 minutes
-  blockDuration: 15 * 60, // block for 15 minutes
+  blockDuration: isProduction ? 10 * 60 : 2 * 60,
 });
 
 // Rate limiter for password reset
 const passwordResetLimiter = new RateLimiterMemory({
-  points: 3, // 3 attempts
+  points: isProduction ? 8 : 20,
   duration: 60 * 60, // per hour
-  blockDuration: 60 * 60, // block for 1 hour
+  blockDuration: isProduction ? 10 * 60 : 2 * 60,
 });
 
 // General API rate limiter
 const apiLimiter = new RateLimiterMemory({
-  points: 100, // 100 requests
+  points: isProduction ? 300 : 600,
   duration: 60, // per minute
 });
 
 // Bulk upload rate limiter - more lenient
 const bulkLimiter = new RateLimiterMemory({
-  points: 5, // 5 bulk uploads
+  points: isProduction ? 10 : 20,
   duration: 5 * 60, // per 5 minutes
 });
 

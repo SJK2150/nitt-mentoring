@@ -49,7 +49,6 @@ function getBulkRowErrorMessage(err: any): string {
 }
 
 export default defineEventHandler(async (e) => {
-  console.log("🔍 [BULK UPLOAD] Starting bulk upload request");
   
   // Check authentication - try both cookie and header
   let token: string | undefined;
@@ -57,42 +56,34 @@ export default defineEventHandler(async (e) => {
   
   if (authHeader && authHeader.startsWith("Bearer ")) {
     token = authHeader.slice(7);
-    console.log("🔍 [BULK UPLOAD] Token from header: EXISTS");
   } else {
     token = getCookie(e, "nitt_token");
-    console.log("🔍 [BULK UPLOAD] Token from cookie:", token ? "EXISTS" : "MISSING");
   }
   
   if (!token) {
-    console.log("❌ [BULK UPLOAD] No token found");
     throw createError({
       statusCode: 401,
       statusMessage: "Not logged in - no token found",
     });
   }
 
-  console.log("🔍 [BULK UPLOAD] Verifying JWT token");
   const jwtPayload = await verifyJwt(token);
   
   if (!jwtPayload || (Date.now() / 1000) > jwtPayload.exp) {
-    console.log("❌ [BULK UPLOAD] JWT verification failed or expired");
     throw createError({
       statusCode: 401,
       statusMessage: "Session expired. Please login again.",
     });
   }
 
-  console.log("🔍 [BULK UPLOAD] User level:", jwtPayload.level);
   
   if (Number(jwtPayload.level) < 2) {
-    console.log("❌ [BULK UPLOAD] Insufficient permissions");
     throw createError({
       statusCode: 403,
       statusMessage: "You do not have permission",
     });
   }
   
-  console.log("✅ [BULK UPLOAD] Authentication successful");
 
   try {
     const body = await readBody(e);
@@ -104,7 +95,6 @@ export default defineEventHandler(async (e) => {
       });
     }
 
-    console.log(`📊 [BULK UPLOAD] Processing ${body.length} students`);
 
     const results: BulkResult = {
       successful: [],
@@ -196,11 +186,9 @@ export default defineEventHandler(async (e) => {
           regno: validatedData.regno,
           name: validatedData.name
         });
-        console.log(`✅ [BULK UPLOAD] Created student: ${validatedData.regno}`);
 
       } catch (err: any) {
         const errorMessage = getBulkRowErrorMessage(err);
-        console.log(`❌ [BULK UPLOAD] Failed for ${studentData?.regno}:`, errorMessage);
 
         results.failed.push({
           regno: studentData?.regno || 'Unknown',
@@ -210,7 +198,6 @@ export default defineEventHandler(async (e) => {
       }
     }
 
-    console.log(`🎉 [BULK UPLOAD] Complete: ${results.successful.length} success, ${results.failed.length} failed`);
 
     return {
       success: true,
@@ -225,7 +212,6 @@ export default defineEventHandler(async (e) => {
       throw err;
     }
     
-    console.error('Bulk student creation error:', err);
     throw createError({
       statusCode: 500,
       statusMessage: "Error processing bulk upload",

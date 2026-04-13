@@ -85,7 +85,6 @@ export default defineEventHandler(async (e) => {
       });
     }
     
-    console.error("Error updating user:", err);
     throw createError({
       statusCode: 500,
       statusMessage: "Internal server error",

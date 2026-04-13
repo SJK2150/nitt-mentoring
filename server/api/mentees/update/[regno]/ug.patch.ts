@@ -45,7 +45,6 @@ export default defineEventHandler(async (e) => {
       message: "UG information updated successfully.",
     };
   } catch (error) {
-    console.error("Error updating UG info:", error);
     throw createError({
       statusCode: 500,
       statusText: "Failed to update UG information.",

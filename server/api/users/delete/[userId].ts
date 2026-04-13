@@ -104,8 +104,6 @@ export default defineEventHandler(async (e) => {
       message: "User deleted successfully.",
     };
   } catch (error: any) {
-    console.error("Error deleting user:", error);
-    
     if (error.statusCode) {
       throw error; // Re-throw our custom errors
     }
